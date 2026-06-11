@@ -1,0 +1,761 @@
+/* ============================================================
+   RetroDesk 95 — Windows 95 風デスクトップ
+   ============================================================ */
+
+:root {
+  --face:   #c0c0c0;
+  --hilite: #ffffff;
+  --light:  #dfdfdf;
+  --shadow: #808080;
+  --dark:   #0a0a0a;
+  --desktop:#008080;
+  --title-a1:#000080;
+  --title-a2:#1084d0;
+  --title-i1:#808080;
+  --title-i2:#b5b5b5;
+  --sel:    #000080;
+  --font: "MS UI Gothic", "MS PGothic", "MS Sans Serif", "Hiragino Kaku Gothic StdN", Tahoma, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
+
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--font);
+  font-size: 12px;
+  color: #000;
+  cursor: default;
+  -webkit-user-select: none;
+  user-select: none;
+  background: #000;
+}
+input, textarea { -webkit-user-select: text; user-select: text; font-family: var(--font); }
+svg { display: block; width: 100%; height: 100%; }
+
+/* ---- 共通ベベル ---- */
+.bevel-out, .btn95 {
+  background: var(--face);
+  box-shadow: inset -1px -1px var(--dark), inset 1px 1px var(--hilite),
+              inset -2px -2px var(--shadow), inset 2px 2px var(--light);
+}
+.bevel-in {
+  background: #fff;
+  box-shadow: inset -1px -1px var(--hilite), inset 1px 1px var(--shadow),
+              inset -2px -2px var(--light), inset 2px 2px var(--dark);
+}
+.sunken-lite { box-shadow: inset 1px 1px var(--shadow), inset -1px -1px var(--hilite); }
+
+.btn95 {
+  border: none;
+  font-family: var(--font);
+  font-size: 12px;
+  padding: 4px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: default;
+  color: #000;
+}
+.btn95:focus-visible { outline: 1px dotted #000; outline-offset: -5px; }
+.btn95:active, .btn95.pressed {
+  box-shadow: inset -1px -1px var(--hilite), inset 1px 1px var(--dark),
+              inset -2px -2px var(--light), inset 2px 2px var(--shadow);
+}
+.btn95:active > *, .btn95.pressed > * { transform: translate(1px, 1px); }
+.btn95:disabled { color: var(--shadow); text-shadow: 1px 1px var(--hilite); }
+.btn95:disabled:active {
+  box-shadow: inset -1px -1px var(--dark), inset 1px 1px var(--hilite),
+              inset -2px -2px var(--shadow), inset 2px 2px var(--light);
+}
+.btn95:disabled:active > * { transform: none; }
+
+/* ============================================================
+   画面・デスクトップ
+   ============================================================ */
+#screen { position: fixed; inset: 0; display: flex; flex-direction: column; }
+#desktop {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: var(--desktop);
+}
+#icon-layer, #window-layer { position: absolute; inset: 0; }
+#window-layer { pointer-events: none; }
+#window-layer > * { pointer-events: auto; }
+
+/* ---- デスクトップアイコン ---- */
+.dicon {
+  position: absolute;
+  width: 76px;
+  text-align: center;
+  padding-top: 2px;
+}
+.dicon.dragging { opacity: .6; z-index: 999; }
+.dicon-img { width: 36px; height: 36px; margin: 0 auto; position: relative; pointer-events: none; }
+.dicon-label {
+  display: inline-block;
+  max-width: 74px;
+  margin-top: 4px;
+  padding: 1px 2px;
+  color: #fff;
+  background: transparent;
+  line-height: 1.25;
+  pointer-events: none;
+  overflow-wrap: break-word;
+}
+.dicon.selected .dicon-label { background: var(--sel); outline: 1px dotted #ffff80; }
+.dicon.selected .dicon-img::after {
+  content: ""; position: absolute; inset: 0;
+  background: repeating-conic-gradient(rgba(0,0,128,.85) 0% 25%, transparent 0% 50%) 0 0 / 2px 2px;
+}
+.dicon.drop-hover .dicon-label { background: var(--sel); outline: 1px dotted #ffff80; }
+.dicon.drop-hover .dicon-img { transform: scale(1.15); }
+
+/* ============================================================
+   タスクバー
+   ============================================================ */
+#taskbar {
+  height: 34px;
+  background: var(--face);
+  box-shadow: inset 0 1px var(--hilite), 0 -1px var(--light);
+  border-top: 1px solid var(--face);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 4px 3px 3px;
+  position: relative;
+  z-index: 5;
+}
+#start-button { font-weight: bold; padding: 2px 8px; height: 26px; flex: 0 0 auto; }
+.start-logo { width: 18px; height: 18px; display: inline-block; }
+.task-divider {
+  width: 2px; height: 24px; flex: 0 0 auto;
+  box-shadow: inset 1px 0 var(--shadow), inset -1px 0 var(--hilite);
+}
+#task-buttons {
+  flex: 1;
+  display: flex;
+  gap: 3px;
+  overflow: hidden;
+  height: 26px;
+}
+.task-btn {
+  flex: 0 1 168px;
+  min-width: 48px;
+  height: 26px;
+  padding: 2px 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+}
+.task-btn .tb-icon { width: 16px; height: 16px; flex: 0 0 auto; }
+.task-btn .tb-label {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left;
+}
+.task-btn.pressed {
+  font-weight: bold;
+  background-image: repeating-conic-gradient(#fff 0% 25%, var(--face) 0% 50%);
+  background-size: 2px 2px;
+}
+#tray {
+  flex: 0 0 auto;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px 0 6px;
+  box-shadow: inset 1px 1px var(--shadow), inset -1px -1px var(--hilite);
+}
+#sound-toggle { width: 18px; height: 18px; border: none; background: transparent; padding: 1px; }
+#clock { font-size: 12px; }
+
+/* ============================================================
+   スタートメニュー / コンテキストメニュー
+   ============================================================ */
+#start-menu {
+  position: fixed;
+  left: 2px;
+  bottom: 36px;
+  z-index: 8000;
+  display: flex;
+  background: var(--face);
+  box-shadow: inset -1px -1px var(--dark), inset 1px 1px var(--hilite),
+              inset -2px -2px var(--shadow), inset 2px 2px var(--light);
+  padding: 3px;
+}
+.sm-banner {
+  width: 26px;
+  background: linear-gradient(180deg, #1084d0, #000080 70%);
+  color: #fff;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 8px;
+}
+.sm-banner span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-weight: bold;
+  font-size: 15px;
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+.sm-items { min-width: 200px; padding: 1px; }
+.sm-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+.sm-item .sm-icon { width: 26px; height: 26px; flex: 0 0 auto; }
+.sm-item .sm-arrow { margin-left: auto; font-size: 10px; }
+.sm-item:hover, .sm-item.open { background: var(--sel); color: #fff; }
+.sm-sep { height: 2px; margin: 3px 2px; box-shadow: inset 0 1px var(--shadow), inset 0 -1px var(--hilite); }
+.sm-sub {
+  position: absolute;
+  left: calc(100% - 3px);
+  top: -4px;
+  display: none;
+  background: var(--face);
+  box-shadow: inset -1px -1px var(--dark), inset 1px 1px var(--hilite),
+              inset -2px -2px var(--shadow), inset 2px 2px var(--light);
+  padding: 3px;
+  min-width: 180px;
+  color: #000;
+}
+.sm-item:hover > .sm-sub, .sm-item.open > .sm-sub { display: block; }
+.sm-sub .sm-item { padding: 5px 10px; }
+.sm-sub .sm-icon { width: 20px; height: 20px; }
+
+#ctx-menu {
+  position: fixed;
+  z-index: 8100;
+  background: var(--face);
+  box-shadow: inset -1px -1px var(--dark), inset 1px 1px var(--hilite),
+              inset -2px -2px var(--shadow), inset 2px 2px var(--light);
+  padding: 3px;
+  min-width: 170px;
+}
+#ctx-menu .sm-item { padding: 4px 10px; }
+
+/* ============================================================
+   ウィンドウ
+   ============================================================ */
+.window {
+  position: absolute;
+  background: var(--face);
+  box-shadow: inset -1px -1px var(--dark), inset 1px 1px var(--light),
+              inset -2px -2px var(--shadow), inset 2px 2px var(--hilite);
+  padding: 3px;
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  min-height: 60px;
+  outline: none;
+}
+.window.maximized { left: 0 !important; top: 0 !important; width: 100% !important; height: 100% !important; }
+
+.titlebar {
+  height: 22px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 2px 2px 3px;
+  background: linear-gradient(90deg, var(--title-i1), var(--title-i2));
+  color: #d4d0c8;
+  touch-action: none;
+}
+.window.active > .titlebar { background: linear-gradient(90deg, var(--title-a1), var(--title-a2)); color: #fff; }
+.titlebar-icon { width: 16px; height: 16px; flex: 0 0 auto; pointer-events: none; }
+.titlebar-text {
+  flex: 1;
+  font-weight: bold;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+.titlebar-btns { display: flex; gap: 2px; flex: 0 0 auto; }
+.tbtn {
+  width: 18px; height: 16px;
+  border: none;
+  padding: 0;
+  background: var(--face);
+  box-shadow: inset -1px -1px var(--dark), inset 1px 1px var(--hilite),
+              inset -2px -2px var(--shadow), inset 2px 2px var(--light);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.tbtn:active {
+  box-shadow: inset -1px -1px var(--hilite), inset 1px 1px var(--dark),
+              inset -2px -2px var(--light), inset 2px 2px var(--shadow);
+}
+.tbtn svg { width: 12px; height: 10px; }
+.tbtn-close { margin-left: 2px; }
+
+.window-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.resize-grip {
+  position: absolute;
+  right: 1px; bottom: 1px;
+  width: 16px; height: 16px;
+  cursor: nwse-resize;
+  background:
+    linear-gradient(135deg, transparent 0 50%, var(--hilite) 0 56%, var(--shadow) 0 66%,
+      transparent 0 70%, var(--hilite) 0 76%, var(--shadow) 0 86%,
+      transparent 0 90%, var(--hilite) 0 96%, var(--shadow) 0);
+}
+.window.maximized .resize-grip { display: none; }
+
+/* ---- メニューバー ---- */
+.menubar { display: flex; padding: 1px 0 2px; flex: 0 0 auto; }
+.menubar-item { position: relative; padding: 3px 9px; }
+.menubar-item:hover, .menubar-item.open { background: var(--sel); color: #fff; }
+.menu-drop {
+  display: none;
+  position: absolute;
+  left: 0; top: 100%;
+  z-index: 50;
+  background: var(--face);
+  color: #000;
+  box-shadow: inset -1px -1px var(--dark), inset 1px 1px var(--hilite),
+              inset -2px -2px var(--shadow), inset 2px 2px var(--light);
+  padding: 3px;
+  min-width: 190px;
+  white-space: nowrap;
+}
+.menubar-item.open > .menu-drop { display: block; }
+.menu-entry { display: flex; align-items: center; gap: 8px; padding: 4px 18px 4px 22px; position: relative; }
+.menu-entry:hover { background: var(--sel); color: #fff; }
+.menu-entry.disabled { color: var(--shadow); text-shadow: 1px 1px var(--hilite); }
+.menu-entry.disabled:hover { background: transparent; }
+.menu-entry .accel { margin-left: auto; padding-left: 24px; }
+.menu-entry .check { position: absolute; left: 7px; }
+.menu-sep { height: 2px; margin: 3px 2px; box-shadow: inset 0 1px var(--shadow), inset 0 -1px var(--hilite); }
+
+/* ---- ステータスバー ---- */
+.statusbar { display: flex; gap: 3px; padding-top: 2px; flex: 0 0 auto; }
+.statusbar > span {
+  box-shadow: inset 1px 1px var(--shadow), inset -1px -1px var(--hilite);
+  padding: 2px 8px;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.statusbar > span.fit { flex: 0 0 auto; }
+
+/* ---- ダイアログ ---- */
+.dlg-body { padding: 14px 16px 12px; display: flex; gap: 14px; align-items: flex-start; }
+.dlg-icon { width: 36px; height: 36px; flex: 0 0 auto; }
+.dlg-text { padding-top: 4px; line-height: 1.6; max-width: 340px; }
+.dlg-buttons { display: flex; justify-content: center; gap: 8px; padding: 4px 14px 14px; }
+.dlg-buttons .btn95 { min-width: 80px; justify-content: center; }
+
+/* ============================================================
+   アプリ: メモ帳
+   ============================================================ */
+.notepad-text {
+  flex: 1;
+  resize: none;
+  border: none;
+  outline: none;
+  box-shadow: inset -1px -1px var(--light), inset 1px 1px var(--shadow),
+              inset -2px -2px var(--hilite), inset 2px 2px var(--dark);
+  padding: 6px 8px;
+  font-family: "MS Gothic", "Osaka-Mono", monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  background: #fff;
+  white-space: pre;
+  overflow: auto;
+}
+
+/* ============================================================
+   アプリ: ペイント
+   ============================================================ */
+.paint-main { flex: 1; display: flex; min-height: 0; }
+.paint-tools {
+  flex: 0 0 62px;
+  padding: 4px 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.paint-tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.paint-tool {
+  height: 26px;
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.paint-tool svg { width: 17px; height: 17px; }
+.paint-tool.on {
+  box-shadow: inset -1px -1px var(--hilite), inset 1px 1px var(--dark),
+              inset -2px -2px var(--light), inset 2px 2px var(--shadow);
+  background-image: repeating-conic-gradient(#fff 0% 25%, var(--face) 0% 50%);
+  background-size: 2px 2px;
+}
+.paint-sizes { display: flex; flex-direction: column; gap: 2px; padding: 3px; }
+.paint-size { height: 16px; display: flex; align-items: center; justify-content: center; }
+.paint-size span { display: block; width: 70%; background: #000; border-radius: 4px; }
+.paint-size.on { background: var(--sel); }
+.paint-size.on span { background: #fff; }
+.paint-canvas-wrap {
+  flex: 1;
+  overflow: auto;
+  background: #9c9c94;
+  box-shadow: inset -1px -1px var(--light), inset 1px 1px var(--shadow),
+              inset -2px -2px var(--hilite), inset 2px 2px var(--dark);
+  padding: 8px;
+}
+.paint-canvas-wrap canvas { background: #fff; cursor: crosshair; box-shadow: 1px 1px 0 #555; touch-action: none; }
+.paint-bottom { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 5px 4px 3px; }
+.paint-current {
+  width: 30px; height: 30px; flex: 0 0 auto; position: relative;
+  box-shadow: inset -1px -1px var(--hilite), inset 1px 1px var(--shadow),
+              inset -2px -2px var(--light), inset 2px 2px var(--dark);
+  background: var(--face);
+}
+.paint-current span {
+  position: absolute; inset: 7px;
+  border: 1px solid #555;
+}
+.paint-palette { display: grid; grid-template-columns: repeat(12, 17px); gap: 1px; }
+.paint-swatch {
+  width: 17px; height: 17px;
+  box-shadow: inset -1px -1px var(--hilite), inset 1px 1px var(--shadow),
+              inset -2px -2px var(--light), inset 2px 2px var(--dark);
+}
+
+/* ============================================================
+   アプリ: マインスイーパー
+   ============================================================ */
+.mines-outer {
+  padding: 6px;
+  background: var(--face);
+  border: 3px solid;
+  border-color: var(--hilite) var(--shadow) var(--shadow) var(--hilite);
+  margin: 0 1px 1px;
+}
+.mines-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 6px;
+  border: 2px solid;
+  border-color: var(--shadow) var(--hilite) var(--hilite) var(--shadow);
+  margin-bottom: 6px;
+}
+.mines-lcd {
+  background: #000;
+  color: #f00;
+  font-family: "DSEG7-Classic", "DSEG7 Classic", "Consolas", monospace;
+  font-weight: bold;
+  font-size: 19px;
+  padding: 2px 3px;
+  min-width: 56px;
+  text-align: right;
+  border: 1px solid;
+  border-color: var(--shadow) var(--hilite) var(--hilite) var(--shadow);
+  letter-spacing: 1px;
+}
+.mines-face {
+  width: 30px; height: 30px;
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.mines-face svg { width: 20px; height: 20px; }
+.mines-board {
+  display: grid;
+  border: 3px solid;
+  border-color: var(--shadow) var(--hilite) var(--hilite) var(--shadow);
+  width: max-content;
+  touch-action: none;
+}
+.cell {
+  width: 21px; height: 21px;
+  background: var(--face);
+  box-shadow: inset -2px -2px var(--shadow), inset 2px 2px var(--hilite);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  font-family: Verdana, var(--font);
+  position: relative;
+}
+.cell svg { width: 13px; height: 13px; }
+.cell.open {
+  box-shadow: inset 1px 1px var(--shadow);
+  background: var(--face);
+}
+.cell.boom { background: #f00; }
+.cell.n1 { color: #0000ff; } .cell.n2 { color: #008000; }
+.cell.n3 { color: #ff0000; } .cell.n4 { color: #000080; }
+.cell.n5 { color: #800000; } .cell.n6 { color: #008080; }
+.cell.n7 { color: #000000; } .cell.n8 { color: #808080; }
+.cell.q { color: #000; font-size: 13px; }
+.cell.wrong::after {
+  content: "✕";
+  position: absolute; inset: 0;
+  color: #f00; font-size: 17px; line-height: 21px; text-align: center;
+}
+
+/* ============================================================
+   アプリ: ごみ箱 / マイコンピュータ などのフォルダビュー
+   ============================================================ */
+.folder-toolbar { display: flex; gap: 4px; padding: 2px 0 4px; flex: 0 0 auto; }
+.folder-toolbar .btn95 { padding: 3px 9px; font-size: 12px; }
+.folder-view {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  box-shadow: inset -1px -1px var(--light), inset 1px 1px var(--shadow),
+              inset -2px -2px var(--hilite), inset 2px 2px var(--dark);
+  background: #fff;
+  padding: 10px 6px;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 4px 2px;
+}
+.fitem { width: 84px; text-align: center; padding: 4px 0 6px; }
+.fitem-img { width: 34px; height: 34px; margin: 0 auto; pointer-events: none; }
+.fitem-label { display: inline-block; margin-top: 3px; padding: 1px 3px; pointer-events: none; max-width: 80px; overflow-wrap: break-word; }
+.fitem.selected .fitem-label { background: var(--sel); color: #fff; outline: 1px dotted #ffff80; }
+.folder-empty { color: var(--shadow); width: 100%; text-align: center; padding-top: 48px; }
+
+/* ============================================================
+   その他のウィンドウ内コンテンツ
+   ============================================================ */
+.pad14 { padding: 14px; line-height: 1.7; overflow: auto; }
+.about-body { display: flex; gap: 16px; padding: 18px 20px 8px; align-items: flex-start; }
+.about-logo { width: 52px; height: 52px; flex: 0 0 auto; }
+.about-text h2 { font-size: 16px; margin-bottom: 8px; }
+.about-text p { line-height: 1.7; }
+.about-rule { height: 2px; margin: 10px 0; box-shadow: inset 0 1px var(--shadow), inset 0 -1px var(--hilite); }
+.viewer-pre {
+  flex: 1;
+  overflow: auto;
+  background: #fff;
+  box-shadow: inset -1px -1px var(--light), inset 1px 1px var(--shadow),
+              inset -2px -2px var(--hilite), inset 2px 2px var(--dark);
+  padding: 10px 12px;
+  font-family: "MS Gothic", monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  -webkit-user-select: text; user-select: text;
+}
+.welcome-head {
+  background: var(--title-a1);
+  color: #fff;
+  padding: 14px 18px;
+  font-size: 19px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+.welcome-head small { display: block; font-size: 11px; font-weight: normal; margin-top: 4px; color: #c0d8ff; }
+.welcome-tips { padding: 12px 18px; line-height: 1.9; flex: 1; overflow: auto; }
+.welcome-tips li { margin-left: 18px; }
+.welcome-foot { display: flex; align-items: center; gap: 8px; padding: 8px 14px 12px; }
+.welcome-foot label { display: flex; align-items: center; gap: 5px; }
+.welcome-foot .btn95 { margin-left: auto; min-width: 90px; justify-content: center; }
+
+.run-body { padding: 14px 14px 10px; display: flex; gap: 12px; }
+.run-body .dlg-icon { width: 34px; height: 34px; }
+.run-fields { flex: 1; }
+.run-fields p { margin-bottom: 10px; line-height: 1.5; }
+.run-row { display: flex; align-items: center; gap: 8px; }
+.run-row input {
+  flex: 1;
+  border: none;
+  outline: none;
+  box-shadow: inset -1px -1px var(--light), inset 1px 1px var(--shadow),
+              inset -2px -2px var(--hilite), inset 2px 2px var(--dark);
+  padding: 4px 6px;
+  font-size: 13px;
+  background: #fff;
+}
+
+.shutdown-body { padding: 16px 18px 8px; display: flex; gap: 16px; }
+.shutdown-opts { display: flex; flex-direction: column; gap: 8px; padding-top: 4px; }
+.shutdown-opts label { display: flex; gap: 7px; align-items: center; }
+.shutdown-opts label.off { color: var(--shadow); text-shadow: 1px 1px var(--hilite); }
+
+.drive-list { padding: 4px; }
+.drive-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; }
+.drive-row .drive-icon { width: 30px; height: 30px; flex: 0 0 auto; }
+.drive-row.selected { background: var(--sel); color: #fff; }
+.sysinfo { padding: 10px 14px; line-height: 1.8; border-top: 1px solid var(--shadow); box-shadow: 0 1px 0 var(--hilite) inset; }
+
+.dialup-body { padding: 16px; text-align: center; line-height: 2; }
+.dialup-anim { font-size: 22px; letter-spacing: 4px; margin: 6px 0; }
+
+/* ============================================================
+   起動 / 終了 / BSOD / スクリーンセーバー / CRT
+   ============================================================ */
+#boot {
+  position: fixed; inset: 0;
+  background: #000;
+  z-index: 11000;
+  color: #aaa;
+}
+#boot.fading { transition: opacity .6s; opacity: 0; }
+#boot-power {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 18px;
+}
+.boot-logo-grid, .splash-logo-grid {
+  width: 72px; height: 72px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.boot-logo-grid::before, .splash-logo-grid::before,
+.boot-logo-grid::after, .splash-logo-grid::after { content: none; }
+.boot-logo-grid div, .splash-logo-grid div { width: 100%; height: 100%; }
+.boot-power-title {
+  font-size: 42px;
+  font-weight: bold;
+  color: #fff;
+  font-style: italic;
+  letter-spacing: 1px;
+}
+.boot-power-title span { color: #5ad0ff; font-style: normal; margin-left: 6px; }
+.boot-power-hint { font-size: 13px; color: #888; }
+
+#boot-bios {
+  position: absolute; inset: 0;
+  padding: 24px 28px;
+  font-family: "MS Gothic", "Consolas", monospace;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #c8c8c8;
+  white-space: pre-wrap;
+}
+
+#boot-splash {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, #2a55a0 0%, #3a7abf 55%, #58a0d8 100%);
+  overflow: hidden;
+}
+.splash-clouds {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(closest-side, rgba(255,255,255,.85), transparent) 12% 22% / 360px 140px no-repeat,
+    radial-gradient(closest-side, rgba(255,255,255,.7), transparent) 78% 30% / 420px 170px no-repeat,
+    radial-gradient(closest-side, rgba(255,255,255,.6), transparent) 40% 75% / 520px 200px no-repeat,
+    radial-gradient(closest-side, rgba(255,255,255,.5), transparent) 90% 80% / 300px 130px no-repeat;
+  filter: blur(2px);
+}
+.splash-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 14px;
+}
+.splash-name {
+  font-size: 56px;
+  font-weight: bold;
+  font-style: italic;
+  color: #fff;
+  text-shadow: 3px 3px 0 rgba(0,0,40,.45);
+}
+.splash-95 { font-style: normal; color: #ffe14d; margin-left: 10px; }
+.splash-tag { color: #dcecff; font-size: 13px; letter-spacing: 2px; }
+.splash-stripe {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 16px;
+  background: #000;
+  overflow: hidden;
+}
+.splash-stripe-runner {
+  position: absolute; top: 3px; bottom: 3px;
+  width: 120px;
+  background: linear-gradient(90deg, transparent, #00d8ff 30%, #0050ff 70%, transparent);
+  animation: stripe-run 1.4s linear infinite;
+}
+@keyframes stripe-run {
+  from { left: -130px; }
+  to   { left: 100%; }
+}
+
+#shutdown-screen {
+  position: fixed; inset: 0;
+  background: #000;
+  z-index: 10500;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 26px;
+}
+.shutdown-msg {
+  color: #ffa028;
+  font-size: 30px;
+  font-weight: bold;
+  text-align: center;
+  text-shadow: 2px 2px 0 #502800;
+}
+.shutdown-sub { color: #666; font-size: 13px; }
+
+#bsod {
+  position: fixed; inset: 0;
+  background: #0000a8;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bsod-inner {
+  color: #fff;
+  font-family: "MS Gothic", "Consolas", monospace;
+  font-size: 15px;
+  line-height: 1.7;
+  max-width: 640px;
+  padding: 20px;
+}
+.bsod-title {
+  background: #a8a8a8;
+  color: #0000a8;
+  display: table;
+  margin: 0 auto 22px;
+  padding: 1px 10px;
+  font-weight: bold;
+}
+.bsod-continue { text-align: center; }
+
+#screensaver { position: fixed; inset: 0; z-index: 9000; background: #000; cursor: none; }
+#ss-canvas { width: 100%; height: 100%; display: block; }
+
+#crt {
+  position: fixed; inset: 0;
+  z-index: 12000;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, transparent 58%, rgba(0,0,10,.18) 100%),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.05) 0 1px, transparent 1px 3px);
+}
+
+.blink { animation: blink-anim 1.05s steps(1) infinite; }
+@keyframes blink-anim { 50% { opacity: 0; } }
+
+/* 最小化/復元アニメーション中 */
+.window.animating { pointer-events: none; }

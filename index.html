@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fable 5 vs Opus 4.8 — 成果物デモ一覧</title>
+<style>
+  body { font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif; max-width: 880px; margin: 2rem auto; padding: 0 1rem; color: #222; line-height: 1.7; }
+  h1 { font-size: 1.5rem; border-bottom: 3px solid #222; padding-bottom: .4rem; }
+  h2 { font-size: 1.15rem; margin-top: 2.2rem; }
+  p.lead { color: #555; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: .8rem; margin-top: .8rem; }
+  .card { border: 1px solid #ccc; border-radius: 8px; padding: .8rem; text-decoration: none; color: inherit; display: block; transition: box-shadow .15s; }
+  .card:hover { box-shadow: 0 2px 10px rgba(0,0,0,.15); }
+  .model { font-weight: bold; font-size: .95rem; }
+  .fable { color: #7c3aed; } .opus { color: #0369a1; }
+  .meta { font-size: .8rem; color: #666; margin-top: .3rem; }
+  .badge { display: inline-block; font-size: .72rem; padding: .05rem .45rem; border-radius: 99px; margin-top: .35rem; }
+  .ok { background: #dcfce7; color: #166534; } .broken { background: #fee2e2; color: #991b1b; }
+  footer { margin-top: 3rem; font-size: .85rem; color: #777; border-top: 1px solid #ddd; padding-top: .8rem; }
+  a.repo { color: #0369a1; }
+</style>
+</head>
+<body>
+<h1>Fable 5 vs Opus 4.8 — 成果物デモ一覧</h1>
+<p class="lead">同じプロンプトを1回だけ渡して作らせた成果物の実物です(無修正)。検証方法とデータは <a class="repo" href="https://github.com/yukurash/fable5-vs-opus48-arena">リポジトリのREADME</a> へ。</p>
+
+<h2>🔴 Task C-1: 押してはいけないボタン(自由演技・プロンプト3行)</h2>
+<div class="grid">
+  <a class="card" href="artifacts/c1/fable5-run1/index.html"><span class="model fable">Fable 5</span> run1<div class="meta">1,297行 / $2.77 / 7分</div><span class="badge ok">動作</span></a>
+  <a class="card" href="artifacts/c1/fable5-run2/index.html"><span class="model fable">Fable 5</span> run2<div class="meta">1,411行 / $2.49 / 7分</div><span class="badge ok">動作</span></a>
+  <a class="card" href="artifacts/c1/opus48-run1/index.html"><span class="model opus">Opus 4.8</span> run1<div class="meta">672行 / $0.60 / 3分</div><span class="badge ok">動作</span></a>
+  <a class="card" href="artifacts/c1/opus48-run2/index.html"><span class="model opus">Opus 4.8</span> run2<div class="meta">412行 / $0.36 / 2分</div><span class="badge ok">動作</span></a>
+</div>
+
+<h2>🖥️ Task C-2: Win95風デスクトップ(規定演技・必須14機能)</h2>
+<div class="grid">
+  <a class="card" href="artifacts/c2/fable5-run1/index.html"><span class="model fable">Fable 5</span> run1<div class="meta">2,327行 / $5.64 / 16分</div><span class="badge broken">起動不能(shell.js欠落)</span></a>
+  <a class="card" href="artifacts/c2/fable5-run2/index.html"><span class="model fable">Fable 5</span> run2<div class="meta">5モジュール / $10.75 / 28分</div><span class="badge ok">14/14 動作</span></a>
+  <a class="card" href="artifacts/c2/opus48-run1/index.html"><span class="model opus">Opus 4.8</span> run1<div class="meta">2,086行 / $3.16 / 13分</div><span class="badge ok">14/14 動作</span></a>
+</div>
+
+<h2>⚙️ Task A: 仕様書からのREST API実装(コードのみ)</h2>
+<div class="grid">
+  <a class="card" href="https://github.com/yukurash/fable5-vs-opus48-arena/tree/main/artifacts/a/fable5-run1"><span class="model fable">Fable 5</span> run1<div class="meta">隠しテスト 27/27</div><span class="badge ok">全合格</span></a>
+  <a class="card" href="https://github.com/yukurash/fable5-vs-opus48-arena/tree/main/artifacts/a/opus48-run1"><span class="model opus">Opus 4.8</span> run1<div class="meta">隠しテスト 27/27</div><span class="badge ok">全合格</span></a>
+</div>
+
+<footer>
+  検証: 2026-06-11 / Claude Code 2.1.172 ヘッドレスモード / 1ターン・介入なし / コストはAPI料金換算値。
+  成果物は各ランのブランチからの無修正コピーです(動かないものも証拠としてそのまま掲載)。
+</footer>
+</body>
+</html>

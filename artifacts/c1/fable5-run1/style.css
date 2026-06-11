@@ -1,0 +1,684 @@
+/* ============================================================
+   絶対に押してはいけないボタン — 秘密施設・制御室アエステティック
+   ============================================================ */
+
+:root {
+  --bg: #0b0d10;
+  --metal-1: #232830;
+  --metal-2: #161a20;
+  --metal-edge: #3a414d;
+  --hazard-y: #f5c518;
+  --hazard-dark: #15130a;
+  --danger: #e3342f;
+  --danger-deep: #8c130f;
+  --lcd-bg: #0c1608;
+  --lcd-green: #9dff57;
+  --amber: #ffb000;
+  --ink: #d8dde6;
+  --font-display: "Reggae One", serif;
+  --font-pixel: "DotGothic16", monospace;
+  --font-body: "Zen Kaku Gothic New", sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -10%, #1a2027 0%, transparent 55%),
+    repeating-linear-gradient(0deg, transparent 0 47px, rgba(255,255,255,.015) 47px 48px),
+    repeating-linear-gradient(90deg, transparent 0 47px, rgba(255,255,255,.015) 47px 48px),
+    var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  overflow-x: hidden;
+  transition: transform .8s cubic-bezier(.3,1.4,.4,1), filter .4s;
+}
+
+/* ---- 全画面エフェクト層 ---- */
+#scanlines {
+  position: fixed; inset: 0; z-index: 60; pointer-events: none;
+  background: repeating-linear-gradient(0deg,
+    rgba(0,0,0,.12) 0 1px, transparent 1px 3px);
+  mix-blend-mode: multiply;
+  opacity: .5;
+}
+#vignette {
+  position: fixed; inset: 0; z-index: 61; pointer-events: none;
+  background: radial-gradient(ellipse 90% 80% at 50% 45%, transparent 55%, rgba(0,0,0,.55) 100%);
+}
+#alarm-light {
+  position: fixed; inset: -40%; z-index: 59; pointer-events: none;
+  background: conic-gradient(from 0deg,
+    transparent 0deg, rgba(255,30,20,.28) 25deg, transparent 60deg,
+    transparent 180deg, rgba(255,30,20,.28) 205deg, transparent 240deg);
+  opacity: 0;
+  transition: opacity .6s;
+}
+body.alert #alarm-light {
+  opacity: 1;
+  animation: alarm-spin 1.6s linear infinite;
+}
+@keyframes alarm-spin { to { transform: rotate(360deg); } }
+
+body.alert { animation: alert-throb 1.6s ease-in-out infinite; }
+@keyframes alert-throb {
+  0%, 100% { filter: none; }
+  50% { filter: brightness(1.08) saturate(1.2); }
+}
+
+/* 画面シェイク */
+body.shake { animation: shake .45s linear; }
+@keyframes shake {
+  0%,100% { transform: translate(0,0); }
+  15% { transform: translate(-10px, 4px) rotate(-.6deg); }
+  30% { transform: translate(9px, -6px) rotate(.5deg); }
+  45% { transform: translate(-7px, 5px) rotate(-.4deg); }
+  60% { transform: translate(7px, 3px) rotate(.4deg); }
+  75% { transform: translate(-5px, -4px) rotate(-.2deg); }
+  90% { transform: translate(3px, 2px); }
+}
+body.shake-hard { animation: shake .45s linear 3; }
+
+/* グリッチ */
+body.glitch { animation: glitch-body .12s steps(2) 14; }
+@keyframes glitch-body {
+  0%   { filter: invert(0) hue-rotate(0); transform: translateX(0); }
+  25%  { filter: invert(1) hue-rotate(90deg); transform: translateX(-8px) skewX(2deg); }
+  50%  { filter: invert(0) hue-rotate(180deg); transform: translateX(6px); }
+  75%  { filter: invert(1) saturate(3); transform: translateX(-4px) skewX(-2deg); }
+  100% { filter: none; transform: none; }
+}
+
+/* 施設が傾く */
+body.tilted { transform: rotate(2.2deg) translateY(6px); }
+
+/* ============================================================
+   制御卓
+   ============================================================ */
+#console {
+  position: relative;
+  z-index: 10;
+  width: min(680px, 100%);
+  background:
+    repeating-linear-gradient(95deg, rgba(255,255,255,.022) 0 2px, transparent 2px 5px),
+    linear-gradient(180deg, var(--metal-1) 0%, var(--metal-2) 100%);
+  border: 1px solid var(--metal-edge);
+  border-radius: 14px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.07) inset,
+    0 -8px 24px rgba(0,0,0,.5) inset,
+    0 30px 60px rgba(0,0,0,.65),
+    0 4px 12px rgba(0,0,0,.5);
+  padding: 0 28px 26px;
+  overflow: hidden;
+}
+/* 四隅のネジ */
+#console::before, #console::after {
+  content: "";
+  position: absolute;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #6b7484, #2a2f38 70%);
+  box-shadow: 0 1px 2px rgba(0,0,0,.8), 460px 0 0 0 #39404c inset;
+}
+#console::before { top: 16px; left: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.8); }
+#console::after  { top: 16px; right: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.8); }
+
+.hazard-strip {
+  height: 18px;
+  margin: 0 -28px;
+  background: repeating-linear-gradient(-45deg,
+    var(--hazard-y) 0 16px, var(--hazard-dark) 16px 32px);
+  border-bottom: 1px solid rgba(0,0,0,.6);
+  box-shadow: 0 2px 6px rgba(0,0,0,.4);
+}
+.hazard-strip.bottom {
+  margin-top: 22px;
+  border-bottom: 0;
+  border-top: 1px solid rgba(0,0,0,.6);
+}
+
+/* ---- ヘッダー ---- */
+.console-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 20px 0 6px;
+}
+.console-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(19px, 3.4vw, 27px);
+  letter-spacing: .06em;
+  color: #f3d9a4;
+  text-align: center;
+  text-shadow: 0 0 18px rgba(245,197,24,.25), 0 2px 0 rgba(0,0,0,.7);
+}
+.plate {
+  background: linear-gradient(180deg, #2c323c, #1a1e25);
+  border: 1px solid #444c59;
+  border-radius: 5px;
+  padding: 5px 10px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.06) inset, 0 2px 4px rgba(0,0,0,.5);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-family: var(--font-pixel);
+}
+.plate-label { font-size: 9px; color: #8a93a3; letter-spacing: .15em; }
+.plate-value { font-size: 11px; color: #c4ccd9; white-space: nowrap; }
+.toggle-plate {
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px; min-height: 40px;
+  font-size: 18px;
+  color: var(--lcd-green);
+  transition: transform .1s;
+}
+.toggle-plate:active { transform: translateY(1px); }
+.toggle-plate.muted { color: #5a6170; }
+
+/* ---- LCDモニター ---- */
+.lcd-frame {
+  position: relative;
+  margin-top: 16px;
+  background: #0d1014;
+  border: 1px solid #000;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.05), 0 4px 10px rgba(0,0,0,.5) inset;
+}
+.lcd-tag {
+  position: absolute;
+  top: -9px; left: 16px;
+  background: var(--metal-2);
+  border: 1px solid var(--metal-edge);
+  border-radius: 3px;
+  padding: 1px 8px;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: #97a1b2;
+  letter-spacing: .2em;
+}
+.lcd {
+  min-height: 86px;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,.25) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse 110% 100% at 50% 0%, #16280e 0%, var(--lcd-bg) 70%);
+  border-radius: 4px;
+  padding: 14px 16px;
+  font-family: var(--font-pixel);
+  font-size: clamp(15px, 2.6vw, 18px);
+  line-height: 1.65;
+  color: var(--lcd-green);
+  text-shadow: 0 0 8px rgba(157,255,87,.55);
+  overflow-wrap: anywhere;
+}
+.lcd.warn { color: var(--amber); text-shadow: 0 0 8px rgba(255,176,0,.55); }
+.lcd.danger { color: #ff5b50; text-shadow: 0 0 10px rgba(255,60,40,.6); }
+.lcd-cursor { animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ---- 計器 ---- */
+.meters {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.meter {
+  flex: 1;
+  min-width: 110px;
+  background: linear-gradient(180deg, #14171c, #0e1115);
+  border: 1px solid #31394a;
+  border-radius: 7px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 3px 8px rgba(0,0,0,.45) inset;
+}
+.meter-label {
+  font-size: 10px;
+  letter-spacing: .18em;
+  color: #76808f;
+  font-family: var(--font-pixel);
+}
+.meter-value {
+  font-family: var(--font-pixel);
+  font-size: 30px;
+  color: var(--danger);
+  text-shadow: 0 0 12px rgba(227,52,47,.6);
+  line-height: 1.1;
+}
+.meter-value.level { color: var(--amber); text-shadow: 0 0 12px rgba(255,176,0,.5); }
+.meter-value.small { font-size: 20px; color: #8a93a3; text-shadow: none; padding-top: 6px; }
+.meter-value.bump { animation: bump .25s ease-out; }
+@keyframes bump { 40% { transform: scale(1.35); } }
+
+/* ============================================================
+   ボタン区画
+   ============================================================ */
+.button-bay {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 20px;
+}
+.bay-warning {
+  writing-mode: vertical-rl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: .5em;
+  padding: 14px 6px;
+  color: var(--danger);
+  background: rgba(227,52,47,.06);
+  border: 1px dashed rgba(227,52,47,.5);
+  border-radius: 6px;
+  text-shadow: 0 0 10px rgba(227,52,47,.4);
+  user-select: none;
+}
+
+#button-stage {
+  position: relative;
+  flex: 1;
+  max-width: 360px;
+  min-height: 270px;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 45%, rgba(227,52,47,.07), transparent 70%),
+    linear-gradient(180deg, #181c22, #101319);
+  border: 1px solid #333b48;
+  border-radius: 10px;
+  box-shadow: 0 6px 16px rgba(0,0,0,.5) inset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 700px;
+}
+
+#button-assembly {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  transition: transform .35s cubic-bezier(.3,1.6,.4,1);
+}
+
+/* 台座 */
+.button-base {
+  position: absolute;
+  inset: 12px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 38%, #3a414d, #1c2027 75%);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.1) inset,
+    0 10px 24px rgba(0,0,0,.7),
+    0 -4px 10px rgba(0,0,0,.6) inset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 赤ボタン本体 */
+#the-button {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  background: radial-gradient(circle at 50% 30%, #ff6157, var(--danger) 45%, var(--danger-deep) 100%);
+  box-shadow:
+    0 14px 0 #6e0d0a,
+    0 22px 28px rgba(0,0,0,.65),
+    0 -6px 14px rgba(0,0,0,.35) inset,
+    0 4px 10px rgba(255,255,255,.25) inset;
+  transform: translateY(-12px);
+  transition: transform .07s, box-shadow .07s;
+  -webkit-tap-highlight-color: transparent;
+}
+#the-button:active {
+  transform: translateY(-1px);
+  box-shadow:
+    0 3px 0 #6e0d0a,
+    0 8px 14px rgba(0,0,0,.6),
+    0 -4px 10px rgba(0,0,0,.4) inset;
+}
+.button-face {
+  position: absolute;
+  top: 14px; left: 22px;
+  width: 64px; height: 34px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,.55), transparent 70%);
+  pointer-events: none;
+}
+body.alert #the-button { animation: btn-throb 1.2s ease-in-out infinite; }
+@keyframes btn-throb {
+  0%,100% { filter: brightness(1); }
+  50% { filter: brightness(1.25) drop-shadow(0 0 18px rgba(255,40,30,.8)); }
+}
+
+/* ---- 安全カバー ---- */
+.cover-hinge {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+#cover {
+  position: absolute;
+  inset: 0;
+  border-radius: 50% 50% 16px 16px;
+  background: linear-gradient(160deg, rgba(255,210,60,.92), rgba(214,160,20,.9));
+  border: 2px solid rgba(120,85,0,.9);
+  box-shadow:
+    0 10px 24px rgba(0,0,0,.55),
+    0 2px 0 rgba(255,255,255,.35) inset;
+  transform-origin: 50% 0%;
+  transform: rotateX(0deg);
+  transition: transform .55s cubic-bezier(.5,1.5,.4,1);
+  cursor: pointer;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  backface-visibility: visible;
+}
+#cover.open {
+  transform: rotateX(-112deg);
+  pointer-events: none;
+  filter: brightness(.8);
+}
+.cover-stripes {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 34px;
+  background: repeating-linear-gradient(-45deg, #1b1500 0 12px, transparent 12px 24px);
+  opacity: .65;
+}
+.cover-text {
+  font-family: var(--font-display);
+  font-size: 34px;
+  letter-spacing: .12em;
+  color: #3a2c00;
+  text-shadow: 0 1px 0 rgba(255,255,255,.35);
+  user-select: none;
+}
+
+/* ---- 銘板 ---- */
+.name-plate {
+  margin: 22px auto 0;
+  width: fit-content;
+  text-align: center;
+  background: linear-gradient(180deg, #b9242b, #8c130f);
+  border: 2px solid #5c0b08;
+  border-radius: 6px;
+  padding: 10px 26px 8px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.2) inset, 0 4px 10px rgba(0,0,0,.5);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.np-main {
+  font-family: var(--font-display);
+  font-size: clamp(14px, 2.6vw, 18px);
+  color: #ffe9e7;
+  letter-spacing: .08em;
+  text-shadow: 0 1px 2px rgba(0,0,0,.6);
+}
+.np-sub { font-size: 10px; color: #ffb9b4; letter-spacing: .3em; }
+
+.page-foot {
+  z-index: 10;
+  margin-top: 18px;
+  font-size: 11px;
+  color: #5a6170;
+  letter-spacing: .08em;
+  text-align: center;
+}
+
+/* ============================================================
+   オーバーレイ群
+   ============================================================ */
+.fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.hidden { display: none !important; }
+
+/* カウントダウン */
+#countdown { background: rgba(2,0,0,.93); }
+.cd-label {
+  font-family: var(--font-display);
+  color: var(--danger);
+  font-size: clamp(20px, 4vw, 34px);
+  letter-spacing: .3em;
+  animation: blink .6s steps(1) infinite;
+}
+#cd-number {
+  font-family: var(--font-pixel);
+  font-size: clamp(120px, 30vw, 260px);
+  color: #ff3b30;
+  text-shadow: 0 0 60px rgba(255,40,30,.8), 0 0 12px rgba(255,120,110,.9);
+  line-height: 1;
+}
+#cd-number.tick { animation: cd-pop .9s ease-out; }
+@keyframes cd-pop {
+  0% { transform: scale(1.6); opacity: .2; }
+  20% { transform: scale(1); opacity: 1; }
+}
+.cd-sub {
+  font-family: var(--font-pixel);
+  color: #ff8a80;
+  letter-spacing: .25em;
+  font-size: 14px;
+}
+
+/* BSOD */
+#bsod {
+  background: #0a48a8;
+  color: #fff;
+  cursor: none;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+  padding: 8vw;
+}
+.bsod-inner { max-width: 720px; font-family: var(--font-body); }
+.bsod-face { font-size: clamp(70px, 12vw, 130px); margin-bottom: 28px; }
+#bsod p { font-size: clamp(15px, 2.4vw, 20px); margin-bottom: 14px; line-height: 1.7; }
+.bsod-progress { font-size: clamp(18px, 3vw, 26px) !important; }
+.bsod-code {
+  font-family: var(--font-pixel);
+  font-size: 13px !important;
+  opacity: .85;
+  margin-top: 26px;
+}
+
+/* 再起動コンソール */
+#reboot {
+  background: #000;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 6vh 7vw;
+  text-align: left;
+}
+#reboot-log {
+  font-family: var(--font-pixel);
+  font-size: clamp(13px, 2.2vw, 17px);
+  line-height: 1.9;
+  color: #9dff57;
+  text-shadow: 0 0 8px rgba(157,255,87,.5);
+  white-space: pre-wrap;
+}
+
+/* 認定証 */
+#certificate { background: rgba(0,0,0,.78); backdrop-filter: blur(3px); }
+.cert-paper {
+  background:
+    radial-gradient(ellipse 120% 100% at 50% 0%, #fdf6e3, #f0e4c4);
+  color: #3a2f1d;
+  width: min(520px, 92vw);
+  padding: 16px;
+  border-radius: 4px;
+  box-shadow: 0 30px 80px rgba(0,0,0,.7);
+  animation: cert-in .7s cubic-bezier(.2,1.4,.4,1);
+}
+@keyframes cert-in {
+  from { transform: translateY(60px) scale(.85); opacity: 0; }
+}
+.cert-border {
+  position: relative;
+  border: 3px double #a8893c;
+  padding: 34px 28px 30px;
+  text-align: center;
+}
+.cert-title {
+  font-family: var(--font-display);
+  font-size: 34px;
+  letter-spacing: .5em;
+  margin-bottom: 18px;
+  color: #6e5316;
+}
+.cert-name {
+  font-size: 20px;
+  font-weight: 700;
+  border-bottom: 1px solid #a8893c;
+  width: fit-content;
+  margin: 0 auto 16px;
+  padding: 0 30px 4px;
+}
+.cert-body { font-size: 15px; line-height: 2; }
+.cert-body strong { font-size: 22px; color: #b3261e; }
+.cert-issuer {
+  margin-top: 20px;
+  font-size: 14px;
+  letter-spacing: .2em;
+  font-weight: 700;
+}
+.cert-stamp {
+  position: absolute;
+  right: 18px; bottom: 14px;
+  width: 74px; height: 74px;
+  border: 4px solid rgba(200,30,25,.85);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(200,30,25,.85);
+  font-family: var(--font-display);
+  font-size: 38px;
+  transform: rotate(-12deg);
+  opacity: 0;
+}
+.cert-stamp.stamped { animation: stamp .4s cubic-bezier(.3,2,.4,1) forwards; }
+@keyframes stamp {
+  0% { transform: rotate(-12deg) scale(3); opacity: 0; }
+  60% { opacity: 1; }
+  100% { transform: rotate(-12deg) scale(1); opacity: .9; }
+}
+#cert-close {
+  display: block;
+  margin: 14px auto 4px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 10px 22px;
+  border-radius: 6px;
+  border: 1px solid #5c0b08;
+  background: linear-gradient(180deg, #c92e28, #8c130f);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #5c0b08;
+  transition: transform .08s, box-shadow .08s;
+}
+#cert-close:active { transform: translateY(3px); box-shadow: 0 1px 0 #5c0b08; }
+
+/* エラーダイアログ */
+#error-layer { position: fixed; inset: 0; z-index: 90; pointer-events: none; }
+.err-dialog {
+  position: absolute;
+  width: 300px;
+  background: #d4d0c8;
+  color: #111;
+  border: 2px solid;
+  border-color: #fff #404040 #404040 #fff;
+  box-shadow: 6px 6px 0 rgba(0,0,0,.4);
+  pointer-events: auto;
+  font-family: var(--font-body);
+  font-size: 13px;
+  animation: err-pop .18s cubic-bezier(.3,1.6,.5,1);
+}
+@keyframes err-pop { from { transform: scale(.6); opacity: 0; } }
+.err-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(90deg, #000080, #1084d0);
+  color: #fff;
+  font-weight: 700;
+  padding: 4px 6px 4px 10px;
+  font-size: 12px;
+  user-select: none;
+}
+.err-x {
+  background: #d4d0c8;
+  border: 1px solid;
+  border-color: #fff #404040 #404040 #fff;
+  width: 18px; height: 16px;
+  font-size: 10px;
+  line-height: 1;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+.err-body {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 14px;
+}
+.err-icon { font-size: 30px; }
+.err-ok {
+  display: block;
+  margin: 0 auto 12px;
+  min-width: 84px;
+  padding: 4px 10px;
+  background: #d4d0c8;
+  border: 1px solid;
+  border-color: #fff #404040 #404040 #fff;
+  font-family: var(--font-body);
+  font-size: 12px;
+  cursor: pointer;
+}
+.err-ok:active, .err-x:active { border-color: #404040 #fff #fff #404040; }
+
+/* ---- レスポンシブ微調整 ---- */
+@media (max-width: 540px) {
+  .bay-warning { display: none; }
+  .console-header { flex-wrap: wrap; justify-content: center; }
+}
+
+/* モーション配慮 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

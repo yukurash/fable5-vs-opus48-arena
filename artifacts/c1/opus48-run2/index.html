@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>絶対に押してはいけないボタン</title>
+<style>
+  :root{
+    --bg1:#0b0d17;
+    --bg2:#161a2e;
+    --danger:#ff2d55;
+    --danger-dark:#c11030;
+    --glow:rgba(255,45,85,.55);
+    --ink:#f5f6ff;
+    --muted:#8b90b5;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;
+    background:radial-gradient(120% 120% at 50% 0%,var(--bg2),var(--bg1));
+    color:var(--ink);
+    min-height:100vh;
+    overflow-x:hidden;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:24px;
+    position:relative;
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+    transition:background .3s;
+  }
+  body.cracked{
+    background:radial-gradient(120% 120% at 50% 0%,#2a0a14,#120208);
+  }
+
+  /* 散らばる警告テープ */
+  .tape{
+    position:fixed; left:-20%; width:140%;
+    background:repeating-linear-gradient(45deg,#ffd400 0 28px,#1a1a1a 28px 56px);
+    color:#111; font-weight:900; letter-spacing:.3em;
+    padding:6px 0; font-size:13px; white-space:nowrap; overflow:hidden;
+    opacity:.85; pointer-events:none; z-index:1;
+  }
+  .tape.top{ top:18px; transform:rotate(-3deg); }
+  .tape.bottom{ bottom:18px; transform:rotate(2deg); }
+  .tape span{ display:inline-block; animation:slide 12s linear infinite; }
+  .tape.bottom span{ animation-direction:reverse; }
+  @keyframes slide{ from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+  h1{
+    font-size:clamp(22px,5vw,40px);
+    font-weight:900;
+    margin-bottom:8px;
+    text-shadow:0 0 18px var(--glow);
+    z-index:2;
+  }
+  .sub{
+    color:var(--muted);
+    font-size:clamp(13px,2.6vw,16px);
+    margin-bottom:38px;
+    z-index:2;
+    min-height:1.4em;
+  }
+
+  /* ボタン本体 */
+  .stage{
+    position:relative; z-index:2;
+    display:flex; flex-direction:column; align-items:center; gap:28px;
+  }
+  .btn{
+    position:relative;
+    border:none; cursor:pointer;
+    font-family:inherit; font-weight:900;
+    color:#fff; font-size:clamp(20px,4.5vw,30px);
+    letter-spacing:.08em;
+    padding:30px 54px;
+    border-radius:24px;
+    background:linear-gradient(180deg,var(--danger),var(--danger-dark));
+    box-shadow:
+      0 10px 0 #7e0a22,
+      0 18px 40px var(--glow),
+      inset 0 2px 8px rgba(255,255,255,.4);
+    transform:translateY(0);
+    transition:transform .06s ease, box-shadow .06s ease, left .18s cubic-bezier(.2,.9,.3,1.4), top .18s cubic-bezier(.2,.9,.3,1.4);
+    will-change:transform,left,top;
+  }
+  .btn::after{
+    content:"";
+    position:absolute; inset:0; border-radius:24px;
+    box-shadow:0 0 0 0 var(--glow);
+    animation:pulse 1.8s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 var(--glow)}
+    70%{box-shadow:0 0 0 22px rgba(255,45,85,0)}
+    100%{box-shadow:0 0 0 0 rgba(255,45,85,0)}
+  }
+  .btn:active{ transform:translateY(8px); box-shadow:0 2px 0 #7e0a22,0 6px 18px var(--glow),inset 0 2px 8px rgba(255,255,255,.4); }
+  .btn.runaway{ position:fixed; z-index:50; }
+
+  .panel{
+    display:flex; gap:30px; color:var(--muted); font-size:14px;
+    z-index:2;
+  }
+  .panel b{ color:var(--ink); font-size:20px; display:block; }
+
+  .reset{
+    margin-top:6px;
+    background:transparent; border:1px solid var(--muted);
+    color:var(--muted); padding:8px 18px; border-radius:999px;
+    font-family:inherit; cursor:pointer; font-size:13px;
+    transition:.2s;
+  }
+  .reset:hover{ color:var(--ink); border-color:var(--ink); }
+
+  /* 画面シェイク */
+  @keyframes shake{
+    10%,90%{transform:translate(-2px,0)}
+    20%,80%{transform:translate(4px,0)}
+    30%,50%,70%{transform:translate(-8px,0)}
+    40%,60%{transform:translate(8px,0)}
+  }
+  body.shake{ animation:shake .5s; }
+  body.bigshake{ animation:shake .5s 3; }
+
+  /* 飛び散る絵文字 */
+  .floaty{
+    position:fixed; font-size:30px; pointer-events:none; z-index:80;
+    animation:floatUp 1.6s ease-out forwards;
+  }
+  @keyframes floatUp{
+    0%{transform:translateY(0) scale(.6) rotate(0); opacity:1}
+    100%{transform:translateY(-220px) scale(1.4) rotate(var(--r,40deg)); opacity:0}
+  }
+
+  /* 偽エラーウィンドウ */
+  .win{
+    position:fixed; z-index:90; width:300px; max-width:84vw;
+    background:#e9ecf3; color:#1a1a2e; border-radius:8px;
+    box-shadow:0 18px 50px rgba(0,0,0,.6);
+    font-size:13px; overflow:hidden;
+    animation:popin .18s ease-out;
+  }
+  @keyframes popin{ from{transform:scale(.8);opacity:0} to{transform:scale(1);opacity:1} }
+  .win .bar{
+    background:linear-gradient(180deg,#3a3f63,#2a2e4a); color:#fff;
+    padding:7px 10px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;
+    cursor:grab;
+  }
+  .win .bar .x{
+    width:18px;height:18px;line-height:16px;text-align:center;
+    background:#ff5f57;border-radius:4px;color:#7a0000;cursor:pointer;font-weight:900;
+  }
+  .win .body{ padding:16px 14px; display:flex; gap:12px; align-items:flex-start; }
+  .win .body .ico{ font-size:30px; }
+  .win .body .ok{
+    margin-top:10px; background:#3a3f63; color:#fff; border:none;
+    padding:6px 16px; border-radius:5px; cursor:pointer; font-family:inherit;
+  }
+
+  /* 最終演出オーバーレイ */
+  .overlay{
+    position:fixed; inset:0; z-index:200;
+    background:#000; color:#0f0;
+    font-family:"Courier New",monospace;
+    display:none; flex-direction:column; align-items:center; justify-content:center;
+    gap:18px; text-align:center; padding:24px;
+  }
+  .overlay.show{ display:flex; }
+  .overlay .big{ font-size:clamp(40px,16vw,140px); font-weight:900; text-shadow:0 0 30px #0f0; }
+  .overlay .line{ font-size:clamp(13px,3vw,18px); opacity:.85; }
+  .overlay .blink{ animation:blink 1s steps(2) infinite; }
+  @keyframes blink{ 50%{opacity:0} }
+
+  .credit{ position:fixed; bottom:6px; right:10px; font-size:11px; color:var(--muted); z-index:2; opacity:.6;}
+</style>
+</head>
+<body>
+  <div class="tape top"><span>⚠ DANGER ⚠ 押すな ⚠ DANGER ⚠ 押すな ⚠ DANGER ⚠ 押すな ⚠ DANGER ⚠ 押すな ⚠ DANGER ⚠ 押すな&nbsp;</span></div>
+  <div class="tape bottom"><span>触るな ⚠ DO NOT PUSH ⚠ 触るな ⚠ DO NOT PUSH ⚠ 触るな ⚠ DO NOT PUSH ⚠ 触るな ⚠ DO NOT PUSH ⚠ 触るな ⚠&nbsp;</span></div>
+
+  <h1>絶対に押してはいけないボタン</h1>
+  <p class="sub" id="sub">これは押すためのボタンではありません。眺めるだけにしてください。</p>
+
+  <div class="stage">
+    <button class="btn" id="btn">押すな</button>
+    <div class="panel">
+      <div>あなたが押した回数<b id="count">0</b></div>
+      <div>本日の世界の被害額<b id="damage">¥0</b></div>
+    </div>
+    <button class="reset" id="reset">…全部なかったことにする</button>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="big" id="cd">3</div>
+    <div class="line" id="ovline">自己破壊シーケンスを開始しました</div>
+    <div class="line blink">ESC……は効きません</div>
+  </div>
+
+  <div class="credit">※ このサイトで失われたものは戻りません（嘘です）</div>
+
+<script>
+(function(){
+  const btn   = document.getElementById('btn');
+  const sub   = document.getElementById('sub');
+  const countEl = document.getElementById('count');
+  const dmgEl = document.getElementById('damage');
+  const resetBtn = document.getElementById('reset');
+  const overlay = document.getElementById('overlay');
+  const cd = document.getElementById('cd');
+  const ovline = document.getElementById('ovline');
+
+  let count = 0;
+  let damage = 0;
+  let runawayMode = false;
+  const emojis = ["💥","🔥","😱","💣","⚡","🌋","🚨","👾","🐙","🤯","💀","🍵","🧨","🌀"];
+
+  // 押すたびのメッセージ（だんだん壊れていく）
+  const messages = [
+    "……押しましたね？まあ一回くらいなら。",
+    "二回目。さすがにもうやめてください。",
+    "警告：あなたの好奇心が制御不能です。",
+    "やめろと言っているのに。人間というのは。",
+    "OK、もう知りません。責任は取りません。",
+    "なぜ人は『押すな』を押すのか、論文が書けます。",
+    "サーバー室で誰かが走り出しました。",
+    "猫が3匹、画面の向こうで驚いて飛び跳ねました。",
+    "あなたの指、ちょっと光ってませんか？",
+    "もう手遅れかもしれません。でも続けてどうぞ。",
+    "宇宙の法則が1つ、こっそり書き換わりました。",
+    "ここまで来たら、もう同志ですね。",
+  ];
+
+  // 逃げる用に枠内のランダム位置へ
+  function moveButtonRandom(){
+    const pad = 20;
+    const w = btn.offsetWidth, h = btn.offsetHeight;
+    const x = Math.random()*(window.innerWidth - w - pad*2)+pad;
+    const y = Math.random()*(window.innerHeight - h - pad*2)+pad;
+    btn.style.left = x+'px';
+    btn.style.top  = y+'px';
+  }
+  function enableRunaway(){
+    if(runawayMode) return;
+    runawayMode = true;
+    const r = btn.getBoundingClientRect();
+    btn.classList.add('runaway');
+    btn.style.left = r.left+'px';
+    btn.style.top  = r.top+'px';
+  }
+
+  // カーソルが近づくと逃げる（5回目以降に発動）
+  document.addEventListener('mousemove', function(e){
+    if(!runawayMode) return;
+    const r = btn.getBoundingClientRect();
+    const cx = r.left + r.width/2, cy = r.top + r.height/2;
+    const dx = e.clientX - cx, dy = e.clientY - cy;
+    const dist = Math.hypot(dx,dy);
+    if(dist < 110){
+      // 反対方向へ逃げる
+      let nx = r.left - dx*1.6;
+      let ny = r.top  - dy*1.6;
+      const w = btn.offsetWidth, h = btn.offsetHeight, pad=10;
+      nx = Math.max(pad, Math.min(window.innerWidth - w - pad, nx));
+      ny = Math.max(pad, Math.min(window.innerHeight - h - pad, ny));
+      btn.style.left = nx+'px';
+      btn.style.top  = ny+'px';
+    }
+  });
+
+  function spawnFloaty(x,y){
+    const f = document.createElement('div');
+    f.className='floaty';
+    f.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    f.style.left = (x-15)+'px';
+    f.style.top  = (y-15)+'px';
+    f.style.setProperty('--r', (Math.random()*120-60)+'deg');
+    document.body.appendChild(f);
+    setTimeout(()=>f.remove(),1600);
+  }
+
+  const errTitles = ["システムエラー","WARNING","良心.exe","物理エンジン","運命.dll","あなたの未来"];
+  const errBodies = [
+    "予期しない好奇心が検出されました。",
+    "『押すな』命令が無視されました（3回目以上）。",
+    "因果律にわずかな負荷がかかっています。",
+    "後悔モジュールを読み込んでいます…",
+    "この操作は元に戻せません。たぶん。",
+    "担当者が在席していません。各自で対処してください。",
+  ];
+  function spawnWindow(){
+    const win = document.createElement('div');
+    win.className='win';
+    win.style.left = (Math.random()*(window.innerWidth-300))+'px';
+    win.style.top  = (Math.random()*(window.innerHeight-180)+30)+'px';
+    const title = errTitles[Math.floor(Math.random()*errTitles.length)];
+    const body  = errBodies[Math.floor(Math.random()*errBodies.length)];
+    win.innerHTML =
+      '<div class="bar"><span>⚠ '+title+'</span><span class="x">×</span></div>'+
+      '<div class="body"><div class="ico">⚠️</div><div>'+body+
+      '<br><button class="ok">OK（押すな）</button></div></div>';
+    document.body.appendChild(win);
+    win.querySelector('.x').onclick = ()=> { win.remove(); };
+    // 「OK」を押すとさらに増える…
+    win.querySelector('.ok').onclick = ()=> {
+      win.remove();
+      spawnWindow(); spawnWindow();
+      bump();
+    };
+    // ドラッグ移動
+    makeDraggable(win, win.querySelector('.bar'));
+  }
+  function makeDraggable(el, handle){
+    let ox=0, oy=0, drag=false;
+    handle.addEventListener('mousedown', e=>{
+      drag=true; ox=e.clientX-el.offsetLeft; oy=e.clientY-el.offsetTop;
+      handle.style.cursor='grabbing';
+    });
+    document.addEventListener('mousemove', e=>{
+      if(!drag) return;
+      el.style.left=(e.clientX-ox)+'px'; el.style.top=(e.clientY-oy)+'px';
+    });
+    document.addEventListener('mouseup', ()=>{ drag=false; handle.style.cursor='grab'; });
+  }
+
+  function fmtYen(n){
+    return '¥'+n.toLocaleString('ja-JP');
+  }
+
+  function bump(){
+    count++;
+    countEl.textContent = count;
+    // 被害額はだんだん指数的に
+    damage += Math.floor(1000 * Math.pow(1.7, Math.min(count,30)));
+    dmgEl.textContent = fmtYen(damage);
+
+    sub.textContent = messages[Math.min(count-1, messages.length-1)];
+
+    // エフェクト
+    const r = btn.getBoundingClientRect();
+    for(let i=0;i<Math.min(count,8);i++){
+      setTimeout(()=>spawnFloaty(r.left+r.width/2+(Math.random()*80-40), r.top+r.height/2),i*60);
+    }
+
+    // シェイク
+    document.body.classList.remove('shake','bigshake'); void document.body.offsetWidth;
+    document.body.classList.add(count>=8 ? 'bigshake':'shake');
+
+    // 段階的な演出
+    if(count===3){ document.body.classList.add('cracked'); }
+    if(count>=4){ spawnWindow(); }
+    if(count===5){
+      enableRunaway();
+      sub.textContent = "ボタンが逃げ始めました。もう関係が壊れています。";
+    }
+    if(count>=6 && Math.random()<0.5){ spawnWindow(); }
+    if(count>=7){ btn.textContent = ["押すな","触るな","やめろ","だめ","NO","🥺"][Math.floor(Math.random()*6)]; }
+
+    // フィナーレ
+    if(count>=10){ finale(); }
+  }
+
+  function finale(){
+    overlay.classList.add('show');
+    let n = 3;
+    cd.textContent = n;
+    ovline.textContent = "自己破壊シーケンスを開始しました";
+    const timer = setInterval(()=>{
+      n--;
+      if(n>0){ cd.textContent = n; }
+      else{
+        clearInterval(timer);
+        cd.textContent = "😇";
+        ovline.innerHTML = "…なんてね。<br>世界はまだ無事です。よく我慢できませんでしたね。";
+        setTimeout(()=>{
+          ovline.innerHTML += "<br><br>あなたの『押すな耐性』：<b>ゼロ</b>";
+        },1200);
+      }
+    },900);
+  }
+
+  btn.addEventListener('click', function(e){
+    bump();
+    if(runawayMode){ moveButtonRandom(); }
+  });
+
+  resetBtn.addEventListener('click', function(){
+    count=0; damage=0; runawayMode=false;
+    countEl.textContent='0'; dmgEl.textContent='¥0';
+    btn.textContent='押すな';
+    btn.classList.remove('runaway');
+    btn.style.left=''; btn.style.top='';
+    document.body.classList.remove('cracked');
+    overlay.classList.remove('show');
+    sub.textContent = "リセットしました。でも、もう一度押したくなってませんか？";
+    document.querySelectorAll('.win,.floaty').forEach(el=>el.remove());
+  });
+
+  // タイトルバーを横切る不穏なカウントダウン（飾り）
+  let glance = 5;
+  setInterval(()=>{
+    if(count>0) return;
+    glance = glance===0?5:glance-1;
+  },1000);
+})();
+</script>
+</body>
+</html>

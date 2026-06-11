@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>絶対に押してはいけないボタン</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='54' r='34' fill='%23e3342f'/><ellipse cx='42' cy='42' rx='12' ry='8' fill='%23ff8a80' opacity='.7'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Reggae+One&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 環境エフェクト -->
+  <div id="alarm-light" aria-hidden="true"></div>
+  <div id="scanlines" aria-hidden="true"></div>
+  <div id="vignette" aria-hidden="true"></div>
+
+  <!-- 制御卓 -->
+  <main id="console">
+    <div class="hazard-strip top"></div>
+
+    <header class="console-header">
+      <div class="plate id-plate">
+        <span class="plate-label">設備番号</span>
+        <span class="plate-value">B-00X / 最終区画</span>
+      </div>
+      <h1 class="console-title">絶対に押してはいけないボタン</h1>
+      <button id="mute-btn" class="plate toggle-plate" aria-label="音の切り替え" title="音 ON/OFF">
+        <span id="mute-icon">♪</span>
+      </button>
+    </header>
+
+    <!-- 管理者通信モニター -->
+    <section class="lcd-frame">
+      <div class="lcd-tag">管理者通信モニター</div>
+      <div id="screen" class="lcd">
+        <span id="lcd-text"></span><span class="lcd-cursor">█</span>
+      </div>
+    </section>
+
+    <!-- 計器類 -->
+    <section class="meters">
+      <div class="meter">
+        <span class="meter-label">違反回数</span>
+        <span id="press-count" class="meter-value">00</span>
+      </div>
+      <div class="meter">
+        <span class="meter-label">警戒レベル</span>
+        <span id="alert-level" class="meter-value level">0</span>
+      </div>
+      <div class="meter wide">
+        <span class="meter-label">累計違反(この端末)</span>
+        <span id="total-count" class="meter-value small">0</span>
+      </div>
+    </section>
+
+    <!-- ボタン本体 -->
+    <section class="button-bay">
+      <div class="bay-warning left">押<br>す<br>な</div>
+
+      <div id="button-stage">
+        <div id="button-assembly">
+          <div class="button-base">
+            <button id="the-button" aria-label="絶対に押してはいけないボタン">
+              <span class="button-face"></span>
+            </button>
+          </div>
+          <div class="cover-hinge">
+            <div id="cover" role="button" tabindex="0" aria-label="安全カバー">
+              <div class="cover-stripes"></div>
+              <span class="cover-text">開けるな</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bay-warning right">触<br>る<br>な</div>
+    </section>
+
+    <div class="name-plate">
+      <span class="np-main">このボタンは絶対に押さないでください</span>
+      <span class="np-sub">― 施設管理部 第7区画 ―</span>
+    </div>
+
+    <div class="hazard-strip bottom"></div>
+  </main>
+
+  <footer class="page-foot">
+    当施設は、押した結果生じたいかなる世界の再起動についても責任を負いません。
+  </footer>
+
+  <!-- エラーダイアログ層 -->
+  <div id="error-layer" aria-hidden="true"></div>
+
+  <!-- カウントダウン -->
+  <div id="countdown" class="fullscreen hidden">
+    <div class="cd-label">自爆シーケンス起動</div>
+    <div id="cd-number">10</div>
+    <div class="cd-sub">回避方法:ありません</div>
+  </div>
+
+  <!-- 世界のブルースクリーン -->
+  <div id="bsod" class="fullscreen hidden">
+    <div class="bsod-inner">
+      <div class="bsod-face">:(</div>
+      <p>世界の運行中に問題が発生したため、世界を再起動する必要があります。</p>
+      <p>エラー情報を収集しています(あなたの所業も含まれます)。</p>
+      <p class="bsod-progress"><span id="bsod-pct">0</span>% 完了</p>
+      <p class="bsod-code">停止コード: PUSHED_THE_FORBIDDEN_BUTTON_20_TIMES</p>
+    </div>
+  </div>
+
+  <!-- 世界の再起動コンソール -->
+  <div id="reboot" class="fullscreen hidden">
+    <pre id="reboot-log"></pre>
+  </div>
+
+  <!-- 認定証 -->
+  <div id="certificate" class="fullscreen hidden">
+    <div class="cert-paper">
+      <div class="cert-border">
+        <h2 class="cert-title">認 定 証</h2>
+        <p class="cert-name">貴殿</p>
+        <p class="cert-body">
+          貴殿は『絶対に押してはいけないボタン』を<br>
+          <strong>20回</strong>押し、世界を再起動させました。<br>
+          その揺るぎない好奇心と、<br>
+          警告文を一切読まない胆力をここに讃えます。
+        </p>
+        <p class="cert-issuer">世界再起動管理委員会</p>
+        <div class="cert-stamp"><span>押</span></div>
+      </div>
+      <button id="cert-close">閉じる(そして二度と押さない)</button>
+    </div>
+  </div>
+
+<script src="script.js"></script>
+</body>
+</html>

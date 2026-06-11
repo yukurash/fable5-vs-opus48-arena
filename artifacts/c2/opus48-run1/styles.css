@@ -1,0 +1,641 @@
+/* ============================================================
+   RetroDesk — Windows 95 風デスクトップ
+   静的な CSS のみ。authentic な配色・ベベルを手作りで再現。
+   ============================================================ */
+
+:root {
+  --gray:      #c0c0c0;
+  --gray-dk:   #808080;
+  --gray-lt:   #dfdfdf;
+  --white:     #ffffff;
+  --black:     #000000;
+  --navy:      #000080;
+  --navy-lt:   #1084d0;
+  --teal:      #008080;
+  --btnface:   #c0c0c0;
+  --titletext: #ffffff;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: "W95FA", "MS Sans Serif", "Pixelated MS Sans Serif", Tahoma, Geneva, sans-serif;
+  font-size: 12px;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+  cursor: default;
+}
+
+/* ---- Win95 bevel helpers ---- */
+.bevel-out {
+  border: 2px solid;
+  border-color: var(--white) var(--gray-dk) var(--gray-dk) var(--white);
+  box-shadow: inset -1px -1px 0 0 var(--black), inset 1px 1px 0 0 var(--gray-lt);
+}
+.bevel-in {
+  border: 2px solid;
+  border-color: var(--gray-dk) var(--white) var(--white) var(--gray-dk);
+  box-shadow: inset -1px -1px 0 0 var(--gray-lt), inset 1px 1px 0 0 var(--black);
+}
+
+/* ============================================================
+   DESKTOP
+   ============================================================ */
+#desktop {
+  position: fixed;
+  inset: 0;
+  bottom: 30px;
+  background: var(--teal);
+  overflow: hidden;
+}
+
+.desktop-icon {
+  position: absolute;
+  width: 76px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-align: center;
+  cursor: default;
+  border: 1px dotted transparent;
+}
+.desktop-icon .icon-img {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+  pointer-events: none;
+  filter: drop-shadow(1px 1px 0 rgba(0,0,0,.35));
+}
+.desktop-icon .icon-label {
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.2;
+  padding: 1px 2px;
+  text-shadow: 1px 1px 0 #000;
+  word-break: break-word;
+  max-width: 74px;
+}
+.desktop-icon.selected .icon-label {
+  background: var(--navy);
+  border: 1px dotted #fff;
+  padding: 0 1px;
+}
+.desktop-icon.selected { border: 1px dotted #ffffff80; }
+.desktop-icon.drag-over .icon-img { filter: brightness(1.4); }
+
+/* ============================================================
+   WINDOWS
+   ============================================================ */
+.window {
+  position: absolute;
+  min-width: 160px;
+  min-height: 80px;
+  background: var(--gray);
+  border: 2px solid;
+  border-color: var(--white) var(--gray-dk) var(--gray-dk) var(--white);
+  box-shadow: inset -1px -1px 0 0 var(--black), inset 1px 1px 0 0 var(--gray-lt), 1px 1px 0 0 rgba(0,0,0,.35);
+  display: flex;
+  flex-direction: column;
+  padding: 2px;
+}
+.window.maximized {
+  border-radius: 0;
+}
+
+.title-bar {
+  height: 20px;
+  background: linear-gradient(90deg, var(--navy), var(--navy-lt));
+  color: var(--titletext);
+  display: flex;
+  align-items: center;
+  padding: 0 2px 0 3px;
+  font-weight: bold;
+  cursor: default;
+  flex: 0 0 auto;
+}
+.window.inactive .title-bar {
+  background: linear-gradient(90deg, var(--gray-dk), #b5b5b5);
+  color: #dfdfdf;
+}
+.title-bar-text {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+.title-bar-text img { width: 16px; height: 16px; image-rendering: pixelated; }
+.title-bar-controls { display: flex; gap: 2px; }
+
+.tb-btn {
+  width: 16px;
+  height: 14px;
+  background: var(--gray);
+  border: 1px solid;
+  border-color: var(--white) var(--gray-dk) var(--gray-dk) var(--white);
+  box-shadow: inset -1px -1px 0 0 var(--black), inset 1px 1px 0 0 var(--gray-lt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: bold;
+  line-height: 1;
+  padding: 0;
+  cursor: default;
+  color: #000;
+}
+.tb-btn:active { border-color: var(--gray-dk) var(--white) var(--white) var(--gray-dk); box-shadow: inset 1px 1px 0 0 var(--black); }
+.tb-btn svg { display: block; }
+.tb-btn.close { margin-left: 2px; }
+
+.window-body {
+  flex: 1 1 auto;
+  margin: 2px 0 0 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.resize-handle {
+  position: absolute;
+  width: 14px; height: 14px;
+  right: 0; bottom: 0;
+  cursor: nwse-resize;
+  z-index: 5;
+}
+
+/* ---- Menu bar (inside apps) ---- */
+.menubar {
+  display: flex;
+  gap: 0;
+  background: var(--gray);
+  padding: 1px 2px;
+  flex: 0 0 auto;
+  border-bottom: 1px solid #00000010;
+}
+.menubar .menu-item {
+  padding: 2px 7px;
+  cursor: default;
+}
+.menubar .menu-item:hover, .menubar .menu-item.open {
+  background: var(--navy);
+  color: #fff;
+}
+
+/* ---- generic Win95 buttons ---- */
+button.w95, .w95-btn {
+  font-family: inherit;
+  font-size: 12px;
+  min-width: 60px;
+  padding: 3px 10px;
+  background: var(--gray);
+  border: 2px solid;
+  border-color: var(--white) var(--gray-dk) var(--gray-dk) var(--white);
+  box-shadow: inset -1px -1px 0 0 var(--black), inset 1px 1px 0 0 var(--gray-lt);
+  cursor: default;
+  color: #000;
+}
+button.w95:active, .w95-btn:active, .w95-btn.active {
+  border-color: var(--gray-dk) var(--white) var(--white) var(--gray-dk);
+  box-shadow: inset 1px 1px 0 0 var(--black);
+  padding: 4px 9px 2px 11px;
+}
+button.w95:focus { outline: 1px dotted #000; outline-offset: -4px; }
+
+/* ============================================================
+   TASKBAR
+   ============================================================ */
+#taskbar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: 30px;
+  background: var(--gray);
+  border-top: 2px solid var(--white);
+  box-shadow: inset 0 1px 0 0 var(--gray-lt);
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  gap: 4px;
+  z-index: 100000;
+}
+
+#start-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 2px 6px 2px 4px;
+  font-weight: bold;
+  font-size: 12px;
+  background: var(--gray);
+  border: 2px solid;
+  border-color: var(--white) var(--gray-dk) var(--gray-dk) var(--white);
+  box-shadow: inset -1px -1px 0 0 var(--black), inset 1px 1px 0 0 var(--gray-lt);
+  cursor: default;
+  flex: 0 0 auto;
+}
+#start-button.active {
+  border-color: var(--gray-dk) var(--white) var(--white) var(--gray-dk);
+  box-shadow: inset 1px 1px 0 0 var(--black);
+}
+#start-button img { width: 18px; height: 18px; image-rendering: pixelated; }
+
+.taskbar-divider {
+  width: 2px;
+  height: 22px;
+  border-left: 1px solid var(--gray-dk);
+  border-right: 1px solid var(--white);
+  margin: 0 2px;
+  flex: 0 0 auto;
+}
+
+#task-buttons {
+  flex: 1 1 auto;
+  display: flex;
+  gap: 3px;
+  overflow: hidden;
+  height: 24px;
+}
+.task-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 120px;
+  max-width: 160px;
+  height: 24px;
+  padding: 0 6px;
+  font-size: 11px;
+  background: var(--gray);
+  border: 2px solid;
+  border-color: var(--white) var(--gray-dk) var(--gray-dk) var(--white);
+  box-shadow: inset -1px -1px 0 0 var(--black), inset 1px 1px 0 0 var(--gray-lt);
+  cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.task-button img { width: 16px; height: 16px; image-rendering: pixelated; flex: 0 0 auto; }
+.task-button span { overflow: hidden; text-overflow: ellipsis; }
+.task-button.active {
+  border-color: var(--gray-dk) var(--white) var(--white) var(--gray-dk);
+  box-shadow: inset 1px 1px 0 0 var(--black);
+  background-image: linear-gradient(45deg, #ffffff40 25%, transparent 25%, transparent 50%, #ffffff40 50%, #ffffff40 75%, transparent 75%);
+  background-size: 4px 4px;
+  font-weight: bold;
+}
+
+#systray {
+  flex: 0 0 auto;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  border: 1px solid;
+  border-color: var(--gray-dk) var(--white) var(--white) var(--gray-dk);
+}
+#systray .tray-icon { width: 16px; height: 16px; image-rendering: pixelated; cursor: default; }
+#clock { font-size: 11px; min-width: 52px; text-align: center; }
+
+/* ============================================================
+   START MENU
+   ============================================================ */
+#start-menu {
+  position: fixed;
+  bottom: 30px;
+  left: 2px;
+  width: 200px;
+  background: var(--gray);
+  border: 2px solid;
+  border-color: var(--white) var(--gray-dk) var(--gray-dk) var(--white);
+  box-shadow: inset -1px -1px 0 0 var(--black), inset 1px 1px 0 0 var(--gray-lt), 2px 2px 4px rgba(0,0,0,.4);
+  display: none;
+  z-index: 100001;
+  padding: 2px;
+}
+#start-menu.open { display: flex; }
+.start-sidebar {
+  width: 24px;
+  background: linear-gradient(180deg, var(--navy), #6a6a9a);
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+  color: #fff;
+  font-weight: bold;
+  font-size: 18px;
+  text-align: center;
+  padding: 8px 2px;
+  letter-spacing: 1px;
+  flex: 0 0 auto;
+}
+.start-sidebar b { color: #fff; }
+.start-items { flex: 1 1 auto; display: flex; flex-direction: column; padding: 1px; }
+
+.start-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px;
+  cursor: default;
+  position: relative;
+  font-size: 13px;
+}
+.start-item img { width: 24px; height: 24px; image-rendering: pixelated; flex: 0 0 auto; }
+.start-item:hover, .start-item.open { background: var(--navy); color: #fff; }
+.start-item .arrow { margin-left: auto; font-size: 10px; }
+.start-divider { height: 2px; margin: 3px 2px; border-top: 1px solid var(--gray-dk); border-bottom: 1px solid var(--white); }
+
+/* submenu */
+.submenu {
+  position: fixed;
+  background: var(--gray);
+  border: 2px solid;
+  border-color: var(--white) var(--gray-dk) var(--gray-dk) var(--white);
+  box-shadow: inset -1px -1px 0 0 var(--black), inset 1px 1px 0 0 var(--gray-lt), 2px 2px 4px rgba(0,0,0,.4);
+  padding: 2px;
+  z-index: 100002;
+  min-width: 160px;
+  display: none;
+  flex-direction: column;
+}
+.submenu.open { display: flex; }
+
+/* context menu */
+#context-menu {
+  position: fixed;
+  background: var(--gray);
+  border: 2px solid;
+  border-color: var(--white) var(--gray-dk) var(--gray-dk) var(--white);
+  box-shadow: inset -1px -1px 0 0 var(--black), inset 1px 1px 0 0 var(--gray-lt), 2px 2px 4px rgba(0,0,0,.4);
+  padding: 2px;
+  z-index: 100003;
+  min-width: 150px;
+  display: none;
+  flex-direction: column;
+}
+#context-menu.open { display: flex; }
+.ctx-item { padding: 4px 20px 4px 24px; cursor: default; font-size: 12px; position: relative; }
+.ctx-item:hover:not(.disabled) { background: var(--navy); color: #fff; }
+.ctx-item.disabled { color: var(--gray-dk); }
+.ctx-divider { height: 2px; margin: 3px 2px; border-top: 1px solid var(--gray-dk); border-bottom: 1px solid var(--white); }
+
+/* dropdown menus (app menubars) */
+.dropdown {
+  position: fixed;
+  background: var(--gray);
+  border: 2px solid;
+  border-color: var(--white) var(--gray-dk) var(--gray-dk) var(--white);
+  box-shadow: inset -1px -1px 0 0 var(--black), inset 1px 1px 0 0 var(--gray-lt), 2px 2px 4px rgba(0,0,0,.4);
+  padding: 2px;
+  z-index: 100004;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+}
+.dropdown .ctx-item { padding: 4px 20px 4px 22px; }
+
+/* ============================================================
+   PAINT APP
+   ============================================================ */
+.paint-app { display: flex; flex-direction: column; height: 100%; background: var(--gray); }
+.paint-main { display: flex; flex: 1 1 auto; overflow: hidden; }
+.paint-tools {
+  width: 56px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 3px;
+  align-content: flex-start;
+  flex: 0 0 auto;
+}
+.paint-tool {
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--gray);
+  border: 1px solid;
+  border-color: var(--white) var(--gray-dk) var(--gray-dk) var(--white);
+  box-shadow: inset -1px -1px 0 0 var(--black), inset 1px 1px 0 0 var(--gray-lt);
+  cursor: default;
+  font-size: 13px;
+}
+.paint-tool.active {
+  border-color: var(--gray-dk) var(--white) var(--white) var(--gray-dk);
+  box-shadow: inset 1px 1px 0 0 var(--black);
+  background-image: linear-gradient(45deg, #ffffff50 25%, transparent 25%, transparent 50%, #ffffff50 50%, #ffffff50 75%, transparent 75%);
+  background-size: 4px 4px;
+}
+.paint-canvas-wrap {
+  flex: 1 1 auto;
+  overflow: auto;
+  background: var(--gray-dk);
+  padding: 4px;
+}
+.paint-canvas-wrap canvas {
+  background: #fff;
+  display: block;
+  cursor: crosshair;
+  image-rendering: pixelated;
+}
+.paint-bottom { display: flex; align-items: center; gap: 6px; padding: 3px 4px; flex: 0 0 auto; }
+.paint-sizes { display: flex; gap: 3px; align-items: center; }
+.paint-size-dot { width: 22px; height: 18px; display:flex; align-items:center; justify-content:center;
+  border: 1px solid; border-color: var(--white) var(--gray-dk) var(--gray-dk) var(--white); background: var(--gray); cursor: default;}
+.paint-size-dot.active { border-color: var(--gray-dk) var(--white) var(--white) var(--gray-dk); }
+.paint-size-dot i { background: #000; display:block; border-radius: 50%; }
+.paint-palette { display: flex; flex-wrap: wrap; width: 272px; gap: 0; flex: 0 0 auto; }
+.paint-current {
+  display: flex; align-items: center; margin-right: 4px;
+  border: 1px solid; border-color: var(--gray-dk) var(--white) var(--white) var(--gray-dk); padding: 2px;
+}
+.paint-current .swatch-fg, .paint-current .swatch-bg { width: 16px; height: 16px; border: 1px solid #000; }
+.paint-current .swatch-bg { margin: -8px 0 0 8px; }
+.swatch {
+  width: 15px; height: 15px;
+  border: 1px solid;
+  border-color: var(--gray-dk) var(--white) var(--white) var(--gray-dk);
+  cursor: default;
+}
+
+/* ============================================================
+   MINESWEEPER
+   ============================================================ */
+.mine-app { padding: 6px; background: var(--gray); height: 100%; display: flex; flex-direction: column; align-items: center; }
+.mine-frame { padding: 6px; }
+.mine-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 4px; margin-bottom: 6px;
+}
+.mine-counter {
+  background: #000; color: #f00; font-family: "Courier New", monospace; font-weight: bold;
+  font-size: 22px; padding: 1px 3px; letter-spacing: 1px; min-width: 44px; text-align: right;
+  border: 1px solid; border-color: var(--gray-dk) var(--white) var(--white) var(--gray-dk);
+  text-shadow: 0 0 2px #f00;
+}
+.mine-face {
+  width: 30px; height: 30px; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--gray);
+  border: 2px solid; border-color: var(--white) var(--gray-dk) var(--gray-dk) var(--white);
+  box-shadow: inset -1px -1px 0 0 var(--black), inset 1px 1px 0 0 var(--gray-lt);
+  cursor: default;
+}
+.mine-face:active { border-color: var(--gray-dk) var(--white) var(--white) var(--gray-dk); }
+.mine-grid { display: grid; gap: 0; }
+.mine-cell {
+  width: 20px; height: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: bold; font-size: 14px; font-family: "Courier New", monospace;
+  background: var(--gray);
+  border: 2px solid; border-color: var(--white) var(--gray-dk) var(--gray-dk) var(--white);
+  cursor: default; line-height: 1;
+}
+.mine-cell.revealed {
+  border: 1px solid var(--gray-dk);
+  background: var(--gray);
+}
+.mine-cell.mine { background: #f00; }
+.mine-cell.flag-wrong::after { content: "✗"; color: #f00; position: absolute; }
+.mine-c1 { color: #0000ff; }
+.mine-c2 { color: #008000; }
+.mine-c3 { color: #ff0000; }
+.mine-c4 { color: #000080; }
+.mine-c5 { color: #800000; }
+.mine-c6 { color: #008080; }
+.mine-c7 { color: #000000; }
+.mine-c8 { color: #808080; }
+.mine-level { display: flex; gap: 4px; margin-top: 8px; }
+
+/* ============================================================
+   NOTEPAD
+   ============================================================ */
+.notepad-app { display: flex; flex-direction: column; height: 100%; }
+.notepad-text {
+  flex: 1 1 auto;
+  resize: none;
+  border: 2px solid;
+  border-color: var(--gray-dk) var(--white) var(--white) var(--gray-dk);
+  box-shadow: inset 1px 1px 0 0 var(--black);
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-size: 13px;
+  padding: 3px;
+  outline: none;
+  background: #fff;
+  margin: 2px;
+}
+.notepad-status { font-size: 11px; padding: 2px 6px; color: #333; flex: 0 0 auto; }
+
+/* generic app text */
+.app-pad { padding: 12px; line-height: 1.5; overflow: auto; height: 100%; }
+.app-pad h2 { margin: 0 0 8px; font-size: 14px; }
+
+/* ============================================================
+   DIALOGS
+   ============================================================ */
+#dialog-layer { position: fixed; inset: 0; z-index: 200000; display: none; }
+#dialog-layer.show { display: block; }
+.dialog-backdrop { position: absolute; inset: 0; }
+.dialog {
+  position: absolute;
+  left: 50%; top: 42%;
+  transform: translate(-50%,-50%);
+  min-width: 280px;
+  max-width: 420px;
+  background: var(--gray);
+  border: 2px solid;
+  border-color: var(--white) var(--gray-dk) var(--gray-dk) var(--white);
+  box-shadow: inset -1px -1px 0 0 var(--black), inset 1px 1px 0 0 var(--gray-lt), 2px 2px 6px rgba(0,0,0,.5);
+  padding: 2px;
+}
+.dialog .title-bar { cursor: default; }
+.dialog-content { display: flex; gap: 12px; padding: 16px 14px; align-items: flex-start; }
+.dialog-icon { font-size: 32px; flex: 0 0 auto; }
+.dialog-msg { font-size: 12px; line-height: 1.5; flex: 1 1 auto; }
+.dialog-buttons { display: flex; justify-content: center; gap: 8px; padding: 0 14px 14px; }
+
+/* ============================================================
+   BOOT / SHUTDOWN / SCREENSAVER
+   ============================================================ */
+#boot {
+  position: fixed; inset: 0; z-index: 300000;
+  background: #000; color: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-family: "W95FA", "MS Sans Serif", sans-serif;
+}
+#boot .boot-logo {
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+}
+#boot .flag {
+  width: 120px; height: 100px; position: relative;
+  transform: skewX(-8deg);
+}
+#boot .flag .q { position: absolute; width: 54px; height: 46px; }
+#boot .flag .q1 { left: 0; top: 0; background: #ff3b30; }
+#boot .flag .q2 { right: 0; top: 0; background: #4cd964; }
+#boot .flag .q3 { left: 0; bottom: 0; background: #007aff; }
+#boot .flag .q4 { right: 0; bottom: 0; background: #ffcc00; }
+#boot .boot-title { font-size: 34px; font-weight: bold; letter-spacing: 1px; }
+#boot .boot-title small { font-size: 16px; font-weight: normal; }
+#boot .boot-bar {
+  margin-top: 30px; width: 240px; height: 18px;
+  border: 2px solid; border-color: var(--gray-dk) var(--white) var(--white) var(--gray-dk);
+  background: #222; padding: 2px;
+}
+#boot .boot-bar i {
+  display: block; height: 100%; width: 0%;
+  background: repeating-linear-gradient(90deg, #008080 0 10px, transparent 10px 13px);
+  transition: width .2s linear;
+}
+#boot .boot-tip { position: absolute; bottom: 24px; font-size: 12px; color: #aaa; }
+
+#shutdown {
+  position: fixed; inset: 0; z-index: 300000;
+  background: #000; color: #ff8c1a;
+  display: none; align-items: center; justify-content: center;
+  flex-direction: column; gap: 20px;
+  font-family: "W95FA", "MS Sans Serif", sans-serif;
+}
+#shutdown.show { display: flex; }
+#shutdown .sd-text { font-size: 28px; text-shadow: 0 0 8px #ff8c1a; text-align:center; }
+#shutdown .sd-sub { font-size: 14px; color:#cc7000; }
+
+#screensaver {
+  position: fixed; inset: 0; z-index: 250000;
+  background: #000; display: none;
+}
+#screensaver.show { display: block; }
+#screensaver canvas { width: 100%; height: 100%; display: block; }
+
+/* BSOD easter egg */
+#bsod {
+  position: fixed; inset: 0; z-index: 400000;
+  background: #0000aa; color: #fff;
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  font-family: "Lucida Console", monospace; font-size: 15px; line-height: 1.7; padding: 40px;
+}
+#bsod.show { display: flex; }
+#bsod .bsod-h { background:#aaa; color:#0000aa; padding: 1px 8px; margin-bottom: 20px; }
+#bsod .bsod-body { max-width: 640px; }
+#bsod .blink { animation: blink 1s steps(2) infinite; }
+@keyframes blink { 0%,50%{opacity:1} 51%,100%{opacity:0} }
+
+.hidden { display: none !important; }
+
+/* selection rubber band */
+#rubber-band {
+  position: absolute;
+  border: 1px dotted #fff;
+  background: rgba(255,255,255,.12);
+  display: none;
+  pointer-events: none;
+  z-index: 1;
+}

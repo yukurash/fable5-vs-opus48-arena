@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>絶対に押してはいけないボタン</title>
+<style>
+  :root{
+    --bg:#0b0d12;
+    --panel:#11141c;
+    --danger:#ff2d2d;
+    --danger-deep:#7a0000;
+    --warn:#ffd400;
+    --ink:#f4f6fb;
+    --muted:#8b93a7;
+    --hazard: repeating-linear-gradient(45deg,#1a1a1a 0 28px,#ffd400 28px 56px);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",YuGothic,"Noto Sans JP",sans-serif;
+    background:
+      radial-gradient(1200px 800px at 50% -10%, #1a2030 0%, transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    overflow:hidden;
+    user-select:none;
+    -webkit-user-select:none;
+    position:relative;
+    min-height:100%;
+  }
+
+  /* ===== 警告ハザードの縁取り ===== */
+  .hazard-top,.hazard-bottom{
+    position:fixed;left:0;right:0;height:14px;z-index:50;
+    background:var(--hazard);
+    background-size:79.2px 79.2px;
+    opacity:.85;
+  }
+  .hazard-top{top:0;}
+  .hazard-bottom{bottom:0;}
+
+  /* ===== ステージ ===== */
+  #stage{
+    position:relative;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:48px 20px;
+    transform-origin:center center;
+    transition:transform .2s ease, filter .25s ease;
+  }
+
+  .titlewrap{text-align:center;margin-bottom:34px;z-index:2;}
+  .eyebrow{
+    letter-spacing:.5em;
+    color:var(--warn);
+    font-size:13px;
+    font-weight:800;
+    margin:0 0 10px;
+    text-indent:.5em;
+    animation:blink 1.4s steps(2,start) infinite;
+  }
+  @keyframes blink{50%{opacity:.25}}
+  h1{
+    margin:0;
+    font-size:clamp(28px,7vw,64px);
+    font-weight:900;
+    line-height:1.05;
+    text-shadow:0 0 24px rgba(255,45,45,.45);
+  }
+  h1 .x{color:var(--danger);text-shadow:0 0 28px rgba(255,45,45,.9);}
+  .subtitle{
+    color:var(--muted);
+    margin:14px 0 0;
+    font-size:clamp(12px,2.6vw,16px);
+  }
+
+  /* ===== ボタン ===== */
+  .btn-cradle{
+    position:relative;
+    z-index:2;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:22px;
+  }
+  .base{
+    width:230px;height:46px;
+    background:linear-gradient(#2a2f3d,#171a22);
+    border-radius:0 0 16px 16px;
+    box-shadow:0 18px 40px rgba(0,0,0,.6), inset 0 2px 0 rgba(255,255,255,.05);
+    margin-top:-26px;
+    border-top:3px solid #3a4154;
+  }
+  .big-btn{
+    position:relative;
+    width:200px;height:200px;
+    border-radius:50%;
+    border:none;
+    cursor:pointer;
+    color:#fff;
+    font-weight:900;
+    font-size:30px;
+    letter-spacing:.04em;
+    background:
+      radial-gradient(circle at 38% 30%, #ff6b6b 0%, var(--danger) 38%, #c40000 72%, var(--danger-deep) 100%);
+    box-shadow:
+      0 0 0 10px #1c0000,
+      0 0 0 16px #2a2f3d,
+      0 26px 50px rgba(255,0,0,.35),
+      inset 0 -14px 24px rgba(0,0,0,.45),
+      inset 0 14px 22px rgba(255,255,255,.28);
+    text-shadow:0 2px 6px rgba(0,0,0,.5);
+    transition:transform .08s ease, box-shadow .15s ease, left .18s cubic-bezier(.22,1,.36,1), top .18s cubic-bezier(.22,1,.36,1);
+    animation:pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 10px #1c0000,0 0 0 16px #2a2f3d,0 26px 50px rgba(255,0,0,.30),inset 0 -14px 24px rgba(0,0,0,.45),inset 0 14px 22px rgba(255,255,255,.28);}
+    50%{box-shadow:0 0 0 10px #1c0000,0 0 0 16px #2a2f3d,0 26px 70px rgba(255,0,0,.65),inset 0 -14px 24px rgba(0,0,0,.45),inset 0 14px 22px rgba(255,255,255,.28);}
+  }
+  .big-btn:active{transform:translateY(6px) scale(.97);}
+  .big-btn.runaway{position:fixed;z-index:30;animation:none;}
+  .big-btn .label-sub{display:block;font-size:12px;font-weight:700;opacity:.85;margin-top:4px;letter-spacing:.2em;}
+
+  .note{
+    color:var(--muted);
+    font-size:13px;
+    text-align:center;
+    max-width:520px;
+    line-height:1.7;
+    z-index:2;
+  }
+  .note b{color:var(--warn);}
+
+  /* ===== HUD（カウンタ・称号） ===== */
+  #hud{
+    position:fixed;top:26px;left:0;right:0;
+    display:flex;justify-content:center;gap:10px;
+    z-index:40;pointer-events:none;flex-wrap:wrap;padding:0 16px;
+  }
+  .chip{
+    background:rgba(17,20,28,.82);
+    border:1px solid #2a3142;
+    border-radius:999px;
+    padding:7px 16px;
+    font-size:13px;
+    backdrop-filter:blur(6px);
+    box-shadow:0 6px 18px rgba(0,0,0,.4);
+  }
+  .chip b{color:var(--danger);font-variant-numeric:tabular-nums;}
+  .chip .rank{color:var(--warn);}
+
+  /* ===== トースト ===== */
+  #toasts{position:fixed;left:50%;bottom:42px;transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:none;}
+  .toast{
+    background:#11141c;border:1px solid #3a4154;color:var(--ink);
+    padding:12px 20px;border-radius:12px;font-size:15px;font-weight:700;
+    box-shadow:0 10px 30px rgba(0,0,0,.55);
+    animation:toastIn .3s ease, toastOut .4s ease 2.6s forwards;
+    max-width:90vw;text-align:center;
+  }
+  .toast.good{border-color:#2ec27e;}
+  .toast.bad{border-color:var(--danger);}
+  @keyframes toastIn{from{opacity:0;transform:translateY(18px) scale(.95)}to{opacity:1}}
+  @keyframes toastOut{to{opacity:0;transform:translateY(-12px)}}
+
+  /* ===== 偽エラーウィンドウ ===== */
+  .fakewin{
+    position:fixed;z-index:70;width:300px;
+    background:#e9e9ee;color:#111;border:1px solid #999;border-radius:8px;
+    box-shadow:0 18px 50px rgba(0,0,0,.6);
+    font-family:"Segoe UI",system-ui,sans-serif;
+    overflow:hidden;
+    animation:popin .18s ease;
+  }
+  @keyframes popin{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+  .fakewin .bar{
+    background:linear-gradient(#3a6df0,#2a55d0);color:#fff;
+    padding:6px 10px;font-size:13px;font-weight:700;
+    display:flex;justify-content:space-between;align-items:center;cursor:grab;
+  }
+  .fakewin .bar .close{
+    width:18px;height:18px;line-height:16px;text-align:center;border-radius:3px;
+    background:#e81123;font-size:12px;cursor:pointer;
+  }
+  .fakewin .body{padding:16px;display:flex;gap:12px;align-items:flex-start;font-size:13px;line-height:1.5;}
+  .fakewin .ico{font-size:30px;}
+  .fakewin .ok{
+    margin:0 16px 14px;float:right;padding:5px 18px;border:1px solid #888;border-radius:5px;
+    background:#f5f5f5;cursor:pointer;font-size:13px;
+  }
+  .fakewin .ok:hover{background:#e2e2e2;}
+
+  /* ===== マトリックス雨 ===== */
+  #matrix{position:fixed;inset:0;z-index:5;pointer-events:none;opacity:0;transition:opacity .6s;}
+  #matrix.on{opacity:.55;}
+
+  /* ===== グリッチ ===== */
+  .glitch{animation:glitch .25s steps(2) infinite;}
+  @keyframes glitch{
+    0%{filter:none;transform:translate(0)}
+    25%{filter:hue-rotate(90deg) saturate(2);transform:translate(-3px,2px)}
+    50%{filter:invert(1);transform:translate(3px,-2px)}
+    75%{filter:hue-rotate(-120deg);transform:translate(-2px,-1px)}
+  }
+
+  /* ===== 振動 ===== */
+  .shake{animation:shake .4s cubic-bezier(.36,.07,.19,.97) both;}
+  @keyframes shake{
+    10%,90%{transform:translate3d(-2px,0,0)}
+    20%,80%{transform:translate3d(4px,0,0)}
+    30%,50%,70%{transform:translate3d(-8px,0,0)}
+    40%,60%{transform:translate3d(8px,0,0)}
+  }
+  .quake{animation:quake .5s linear infinite;}
+  @keyframes quake{
+    0%{transform:translate(1px,1px) rotate(0deg)}
+    25%{transform:translate(-3px,2px) rotate(-.6deg)}
+    50%{transform:translate(2px,-2px) rotate(.6deg)}
+    75%{transform:translate(-2px,-1px) rotate(-.4deg)}
+    100%{transform:translate(2px,2px) rotate(.4deg)}
+  }
+
+  /* ===== 反転 ===== */
+  body.inverted{filter:invert(1) hue-rotate(180deg);}
+
+  /* ===== 重力で落ちるカケラ ===== */
+  .debris{position:fixed;z-index:25;pointer-events:none;font-size:22px;will-change:transform;}
+
+  /* ===== 紙吹雪 ===== */
+  .confetti{position:fixed;top:-20px;z-index:80;width:10px;height:14px;pointer-events:none;will-change:transform;}
+
+  /* ===== クリア演出 ===== */
+  #ending{
+    position:fixed;inset:0;z-index:90;display:none;
+    flex-direction:column;align-items:center;justify-content:center;gap:18px;
+    background:radial-gradient(900px 600px at 50% 40%,#1c2436,#06070b);
+    text-align:center;padding:30px;
+  }
+  #ending.show{display:flex;animation:fadein .8s ease;}
+  @keyframes fadein{from{opacity:0}to{opacity:1}}
+  #ending h2{font-size:clamp(30px,8vw,72px);margin:0;color:var(--warn);text-shadow:0 0 30px rgba(255,212,0,.5);}
+  #ending p{color:var(--muted);max-width:560px;line-height:1.8;margin:0;}
+  .reset-btn{
+    margin-top:8px;padding:14px 30px;border-radius:12px;border:1px solid #3a4154;
+    background:#11141c;color:var(--ink);font-size:16px;font-weight:800;cursor:pointer;
+  }
+  .reset-btn:hover{border-color:var(--danger);color:var(--danger);}
+
+  .footer{
+    position:fixed;bottom:22px;left:0;right:0;text-align:center;
+    color:#4a5163;font-size:11px;z-index:2;
+  }
+
+  @media (max-width:520px){
+    .big-btn{width:170px;height:170px;font-size:26px;}
+    .base{width:200px;}
+  }
+</style>
+</head>
+<body>
+  <div class="hazard-top"></div>
+  <div class="hazard-bottom"></div>
+
+  <canvas id="matrix"></canvas>
+
+  <div id="hud">
+    <div class="chip">押した回数 <b id="count">0</b></div>
+    <div class="chip">称号 <span class="rank" id="rank">良識ある市民</span></div>
+    <div class="chip">残り耐久 <b id="hp">100</b>%</div>
+  </div>
+
+  <div id="stage">
+    <div class="titlewrap">
+      <p class="eyebrow">⚠ DANGER ⚠ ぜったいに ⚠ DANGER ⚠</p>
+      <h1>絶対に押しては<br>いけないボタン<span class="x">。</span></h1>
+      <p class="subtitle">押すとどうなるかは、知らない方がいい。</p>
+    </div>
+
+    <div class="btn-cradle">
+      <button class="big-btn" id="btn">
+        押すな
+        <span class="label-sub">DO NOT PRESS</span>
+      </button>
+      <div class="base"></div>
+    </div>
+
+    <p class="note">
+      この赤いボタンには <b>絶対に</b> 触れないでください。<br>
+      何が起きても当サイトは一切の責任を負いません。<br>
+      …で、本当に押さないんですか？
+    </p>
+  </div>
+
+  <div id="toasts"></div>
+
+  <div id="ending">
+    <h2 id="ending-title">🎉 全クリ 🎉</h2>
+    <p id="ending-text"></p>
+    <button class="reset-btn" id="reset">もう一度、押してはいけない</button>
+  </div>
+
+  <div class="footer">© ぜったい押すな研究所 — このサイトは全部ジョークです。安心して押してください。</div>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ============================================================
+   *  状態
+   * ============================================================ */
+  const KEY = "zettai-oshicount";
+  let count = parseInt(localStorage.getItem(KEY) || "0", 10) || 0;
+  let chaos = 0;            // 累積カオスレベル
+  let dodges = 0;          // 逃げた回数
+  let ended = false;
+
+  const $ = (s) => document.querySelector(s);
+  const stage = $("#stage");
+  const btn = $("#btn");
+  const countEl = $("#count");
+  const rankEl = $("#rank");
+  const hpEl = $("#hp");
+
+  /* ============================================================
+   *  サウンド（Web Audio で自前生成 — 外部ファイル不要）
+   * ============================================================ */
+  let ac = null;
+  const audio = () => (ac ||= new (window.AudioContext || window.webkitAudioContext)());
+  function beep(freq, dur = .12, type = "square", gain = .15, slideTo = null) {
+    try {
+      const c = audio();
+      const o = c.createOscillator();
+      const g = c.createGain();
+      o.type = type; o.frequency.value = freq;
+      if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, c.currentTime + dur);
+      g.gain.value = gain;
+      g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
+      o.connect(g).connect(c.destination);
+      o.start(); o.stop(c.currentTime + dur);
+    } catch (e) {}
+  }
+  const sfx = {
+    alarm(){ beep(880,.18,"sawtooth",.18); setTimeout(()=>beep(660,.22,"sawtooth",.18),150); },
+    zap(){ beep(1200,.18,"square",.16,120); },
+    boom(){ beep(80,.5,"sawtooth",.3,30); },
+    coin(){ beep(988,.08,"square",.18); setTimeout(()=>beep(1319,.18,"square",.18),80); },
+    glitch(){ for(let i=0;i<6;i++) setTimeout(()=>beep(200+Math.random()*1400,.05,"square",.1),i*40); },
+    fanfare(){ [523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.25,"triangle",.2),i*130)); },
+  };
+
+  /* ============================================================
+   *  HUD / 称号
+   * ============================================================ */
+  const RANKS = [
+    [0,   "良識ある市民"],
+    [1,   "うっかりさん"],
+    [2,   "好奇心の奴隷"],
+    [4,   "後悔のプロ"],
+    [7,   "禁断ボタン中毒"],
+    [11,  "破壊の使徒"],
+    [16,  "混沌の管理者"],
+    [25,  "押すな界の伝説"],
+    [40,  "人類への挑戦者"],
+    [66,  "ボタンそのもの"],
+  ];
+  function rankFor(n){ let r="良識ある市民"; for(const [t,name] of RANKS){ if(n>=t) r=name; } return r; }
+
+  function renderHUD(){
+    countEl.textContent = count;
+    rankEl.textContent = rankFor(count);
+    const hp = Math.max(0, 100 - chaos * 7);
+    hpEl.textContent = hp;
+    hpEl.style.color = hp < 30 ? "var(--danger)" : hp < 60 ? "var(--warn)" : "var(--ink)";
+  }
+
+  /* ============================================================
+   *  トースト
+   * ============================================================ */
+  function toast(msg, kind = "") {
+    const t = document.createElement("div");
+    t.className = "toast " + kind;
+    t.innerHTML = msg;
+    $("#toasts").appendChild(t);
+    setTimeout(() => t.remove(), 3200);
+  }
+
+  /* ============================================================
+   *  逃げるボタン（最初の数回はカーソルから逃げる）
+   * ============================================================ */
+  let runaway = true;
+  function placeRandom(){
+    const pad = 90, w = innerWidth, h = innerHeight;
+    const x = pad + Math.random() * (w - pad * 2 - 200);
+    const y = pad + Math.random() * (h - pad * 2 - 200);
+    btn.style.left = x + "px";
+    btn.style.top = y + "px";
+  }
+  const TAUNTS = [
+    "おっと、こっちこっち→","残念でした〜","まだまだ甘い","そう簡単に押させると思った？",
+    "ふふ、無駄無駄","君には無理だよ","逃げ足には自信があってね","あきらめが肝心だよ？",
+  ];
+  function startRunaway(){
+    btn.classList.add("runaway");
+    placeRandom();
+    window.addEventListener("mousemove", flee);
+    window.addEventListener("touchmove", fleeTouch, {passive:true});
+  }
+  function stopRunaway(){
+    runaway = false;
+    btn.classList.remove("runaway");
+    btn.style.left = btn.style.top = "";
+    window.removeEventListener("mousemove", flee);
+    window.removeEventListener("touchmove", fleeTouch);
+  }
+  function dist(ax,ay,bx,by){ return Math.hypot(ax-bx, ay-by); }
+  function maybeFlee(px, py){
+    if (!runaway) return;
+    const r = btn.getBoundingClientRect();
+    const cx = r.left + r.width/2, cy = r.top + r.height/2;
+    if (dist(px,py,cx,cy) < 140) {
+      placeRandom();
+      dodges++;
+      if (dodges <= 12 && dodges % 2 === 0) {
+        toast(TAUNTS[Math.floor(Math.random()*TAUNTS.length)]);
+        beep(440+Math.random()*220,.06,"square",.08);
+      }
+      // しつこく追ってくる人には根負けして押させてあげる
+      if (dodges >= 9) {
+        stopRunaway();
+        toast("…もう、好きにしてよ。押せばいいじゃない。","bad");
+      }
+    }
+  }
+  function flee(e){ maybeFlee(e.clientX, e.clientY); }
+  function fleeTouch(e){ const t=e.touches[0]; if(t) maybeFlee(t.clientX,t.clientY); }
+
+  /* ============================================================
+   *  カオス演出
+   * ============================================================ */
+  function shake(){ stage.classList.remove("shake"); void stage.offsetWidth; stage.classList.add("shake"); }
+
+  function fakeError(){
+    const msgs = [
+      ["⚠","システムエラー","予期しないボタンが押されました。\nエラーコード: 0xPUSH_NO"],
+      ["💣","警告","セルフ・デストラクト・シーケンス…\nは起動しませんでした。安心してください。"],
+      ["🧨","Critical","現実の整合性が 87% 低下しました。"],
+      ["🥴","確認","本当に押しましたね？\n本当に？本当の本当に？"],
+      ["📞","着信","「もしもし、押しましたね？」"],
+      ["🐛","Exception","NullPointerException: 良識 が見つかりません。"],
+    ];
+    const [ico,title,body] = msgs[Math.floor(Math.random()*msgs.length)];
+    const win = document.createElement("div");
+    win.className = "fakewin";
+    win.style.left = (40 + Math.random()*(innerWidth-360)) + "px";
+    win.style.top  = (70 + Math.random()*(innerHeight-260)) + "px";
+    win.innerHTML = `
+      <div class="bar"><span>${title}</span><span class="close">✕</span></div>
+      <div class="body"><div class="ico">${ico}</div><div>${body.replace(/\n/g,"<br>")}</div></div>
+      <button class="ok">OK</button><div style="clear:both"></div>`;
+    document.body.appendChild(win);
+    const kill = () => win.remove();
+    win.querySelector(".close").onclick = kill;
+    win.querySelector(".ok").onclick = kill;
+    // ドラッグ移動
+    const bar = win.querySelector(".bar");
+    bar.onmousedown = (e) => {
+      const ox = e.clientX - win.offsetLeft, oy = e.clientY - win.offsetTop;
+      const mv = (ev) => { win.style.left=(ev.clientX-ox)+"px"; win.style.top=(ev.clientY-oy)+"px"; };
+      const up = () => { document.removeEventListener("mousemove",mv); document.removeEventListener("mouseup",up); };
+      document.addEventListener("mousemove",mv); document.addEventListener("mouseup",up);
+    };
+  }
+
+  function tilt(){
+    const deg = (Math.random()*8 - 4) * Math.min(chaos,4);
+    stage.style.transform = `rotate(${deg}deg) scale(${1 - Math.min(chaos,6)*0.01})`;
+  }
+
+  function invert(){
+    document.body.classList.toggle("inverted");
+    setTimeout(()=>document.body.classList.remove("inverted"), 1400);
+  }
+
+  function gravity(){
+    // 画面のテキストや絵文字を“落とす”
+    const chars = "落崩堕墜壊滅✖💥🔥💀⚠🧨".split("");
+    for (let i=0;i<24;i++){
+      const d = document.createElement("div");
+      d.className = "debris";
+      d.textContent = chars[Math.floor(Math.random()*chars.length)];
+      const x = Math.random()*innerWidth;
+      d.style.left = x+"px"; d.style.top = "-30px";
+      document.body.appendChild(d);
+      const dur = 1400 + Math.random()*1400;
+      const drift = (Math.random()*200-100);
+      const rot = Math.random()*720-360;
+      d.animate(
+        [{transform:`translate(0,0) rotate(0)`},
+         {transform:`translate(${drift}px,${innerHeight+80}px) rotate(${rot}deg)`}],
+        {duration:dur, easing:"cubic-bezier(.45,0,.9,.6)"}
+      ).onfinish = () => d.remove();
+    }
+  }
+
+  function glitch(){
+    document.body.classList.add("glitch");
+    sfx.glitch();
+    setTimeout(()=>document.body.classList.remove("glitch"), 700);
+  }
+
+  function quake(on){
+    document.body.classList.toggle("quake", on);
+  }
+
+  function confetti(){
+    const colors = ["#ff2d2d","#ffd400","#2ec27e","#3a6df0","#ff7ad9","#fff"];
+    for (let i=0;i<120;i++){
+      const c = document.createElement("div");
+      c.className = "confetti";
+      c.style.left = Math.random()*innerWidth+"px";
+      c.style.background = colors[i%colors.length];
+      c.style.borderRadius = Math.random()<.5 ? "50%" : "2px";
+      document.body.appendChild(c);
+      const dur = 2200 + Math.random()*1800;
+      c.animate(
+        [{transform:`translateY(0) rotate(0)`,opacity:1},
+         {transform:`translateY(${innerHeight+40}px) rotate(${Math.random()*900}deg)`,opacity:1}],
+        {duration:dur, easing:"cubic-bezier(.2,.6,.4,1)"}
+      ).onfinish = () => c.remove();
+    }
+  }
+
+  /* ===== マトリックス雨 ===== */
+  const mcanvas = $("#matrix");
+  const mctx = mcanvas.getContext("2d");
+  let matrixOn = false, matrixRAF = null, drops = [];
+  function setupMatrix(){
+    mcanvas.width = innerWidth; mcanvas.height = innerHeight;
+    const cols = Math.floor(innerWidth/16);
+    drops = Array(cols).fill(0).map(()=>Math.random()*-50);
+  }
+  function drawMatrix(){
+    mctx.fillStyle = "rgba(6,7,11,.08)";
+    mctx.fillRect(0,0,mcanvas.width,mcanvas.height);
+    mctx.fillStyle = "#39ff14";
+    mctx.font = "15px monospace";
+    const glyphs = "押ｱｲｳｴｵ01ﾊﾐﾋｰｳ絶対ﾅﾝﾃ";
+    for (let i=0;i<drops.length;i++){
+      const ch = glyphs[Math.floor(Math.random()*glyphs.length)];
+      mctx.fillText(ch, i*16, drops[i]*16);
+      if (drops[i]*16 > mcanvas.height && Math.random()>.975) drops[i]=0;
+      drops[i]++;
+    }
+    matrixRAF = requestAnimationFrame(drawMatrix);
+  }
+  function matrix(on){
+    if (on && !matrixOn){ setupMatrix(); mcanvas.classList.add("on"); matrixOn=true; drawMatrix(); }
+    else if (!on && matrixOn){ mcanvas.classList.remove("on"); matrixOn=false; cancelAnimationFrame(matrixRAF); mctx.clearRect(0,0,mcanvas.width,mcanvas.height); }
+  }
+
+  /* ============================================================
+   *  押下時：段階的にエスカレート
+   * ============================================================ */
+  const LINES = [
+    "だから押すなって言ったのに。",
+    "あ〜あ、押しちゃった。",
+    "もう後戻りできないよ？",
+    "やめられない止まらない。",
+    "現実が軋み始めた…",
+    "君はもう、ボタンの虜だ。",
+    "世界がぐるぐるしてきた。",
+    "正気度がゴリゴリ削れていく。",
+    "もはや何でもアリだ。",
+    "ここまで来たら最後まで行こう。",
+  ];
+
+  function press(){
+    if (ended) return;
+    runaway && stopRunaway();
+    count++;
+    chaos++;
+    localStorage.setItem(KEY, count);
+    renderHUD();
+
+    // 共通：振動＋アラーム＋ひとことトースト
+    shake();
+    sfx.alarm();
+    if (window.navigator.vibrate) navigator.vibrate(60);
+    toast(LINES[Math.min(count-1, LINES.length-1)], "bad");
+
+    // 段階演出（累積）
+    if (count === 1){ sfx.zap(); }
+    if (count >= 2){ tilt(); }
+    if (count >= 3){ invert(); sfx.zap(); }
+    if (count >= 4){ gravity(); sfx.boom(); }
+    if (count >= 5){ fakeError(); }
+    if (count >= 6){ glitch(); }
+    if (count >= 7){ fakeError(); fakeError(); }
+    if (count >= 8){ matrix(true); }
+    if (count >= 9){ quake(true); sfx.boom(); }
+    if (count >= 10){ finale(); return; }
+
+    // 称号アップ通知
+    if (count >= 2 && rankFor(count) !== rankFor(count-1)){
+      sfx.coin();
+      toast("称号を獲得：<b>"+rankFor(count)+"</b>","good");
+    }
+  }
+
+  function finale(){
+    ended = true;
+    confetti();
+    sfx.fanfare();
+    matrix(false); quake(false);
+    stage.style.transform = "";
+    document.body.classList.remove("glitch","inverted");
+
+    const total = parseInt(localStorage.getItem("zettai-total")||"0",10) + count;
+    localStorage.setItem("zettai-total", total);
+
+    $("#ending-title").textContent = "🎉 押しきった！ 🎉";
+    $("#ending-text").innerHTML =
+      `あなたは警告を10回ガン無視し、世界を10回壊しました。<br>
+       獲得称号：<b style="color:var(--warn)">${rankFor(count)}</b><br>
+       通算押下回数：<b style="color:var(--danger)">${total}</b> 回<br><br>
+       …ところで、最初から押す気だったでしょ？`;
+    $("#ending").classList.add("show");
+  }
+
+  /* ============================================================
+   *  リセット
+   * ============================================================ */
+  $("#reset").addEventListener("click", () => {
+    count = 0; chaos = 0; ended = false;
+    localStorage.setItem(KEY, "0");
+    $("#ending").classList.remove("show");
+    document.querySelectorAll(".fakewin,.debris,.confetti").forEach(n=>n.remove());
+    stage.style.transform = "";
+    renderHUD();
+    runaway = true; dodges = 0;
+    startRunaway();
+    toast("もう一度、絶対に押さないでください。");
+    beep(523,.1,"triangle",.15);
+  });
+
+  /* ============================================================
+   *  初期化
+   * ============================================================ */
+  btn.addEventListener("click", press);
+  // “押すな”ボタンはホバーで小さく身構える（逃げない状態のとき）
+  btn.addEventListener("mouseenter", () => { if(!runaway) beep(330,.05,"square",.06); });
+
+  window.addEventListener("resize", () => { if (matrixOn) setupMatrix(); });
+
+  renderHUD();
+  // 過去に押した実績があれば軽く煽る
+  if (count > 0) {
+    toast(`おかえりなさい。前回までに <b>${count}</b> 回も押してますね…`, "bad");
+  } else {
+    setTimeout(()=>toast("ヒント：マウスでボタンに近づいてみて。",""), 900);
+  }
+  startRunaway();
+})();
+</script>
+</body>
+</html>

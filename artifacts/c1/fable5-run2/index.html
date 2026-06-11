@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>絶対に押してはいけないボタン</title>
+<meta name="description" content="押すな。絶対に押すな。いいか、絶対にだぞ。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Rampart+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== メインシーン：制御盤 ===== -->
+  <main id="scene">
+
+    <header class="site-head">
+      <div class="hazard-tape" aria-hidden="true"></div>
+      <h1 class="site-title">絶対に押してはいけないボタン</h1>
+      <p class="site-sub">ABSOLUTELY-DO-NOT-PRESS BUTTON / 管理番号: BTN-666</p>
+      <div class="hazard-tape" aria-hidden="true"></div>
+    </header>
+
+    <section class="panel" aria-label="制御盤">
+
+      <!-- 回転灯 -->
+      <div class="siren" id="siren" aria-hidden="true">
+        <div class="siren-dome"><div class="siren-beam"></div></div>
+        <div class="siren-base"></div>
+      </div>
+
+      <div class="panel-plate">
+        <span class="screw tl" aria-hidden="true"></span>
+        <span class="screw tr" aria-hidden="true"></span>
+        <span class="screw bl" aria-hidden="true"></span>
+        <span class="screw br" aria-hidden="true"></span>
+
+        <div class="warn-plate">
+          <span class="warn-icon" aria-hidden="true">⚠</span>
+          <span class="warn-text">警告 — 押すな。絶対に押すな。</span>
+          <span class="warn-icon" aria-hidden="true">⚠</span>
+        </div>
+
+        <!-- LCD ステータス表示 -->
+        <div class="lcd" role="status" aria-live="polite">
+          <div class="lcd-row">
+            <span class="lcd-label">SYSTEM</span>
+            <span class="lcd-status" id="lcd-status">正常</span>
+          </div>
+          <p class="lcd-text" id="lcd-text"></p>
+          <div class="lcd-row lcd-bottom">
+            <span class="lcd-label">押下回数</span>
+            <span class="odometer" id="odometer">
+              <span class="digit">0</span><span class="digit">0</span><span class="digit">0</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- ボタン本体（安全カバー付き） -->
+        <div class="button-bay" id="button-bay">
+          <div class="button-anchor" id="button-anchor">
+            <div class="button-base">
+              <button class="big-button" id="big-button" aria-label="絶対に押してはいけないボタン">
+                <span class="big-button-text">押すな</span>
+              </button>
+            </div>
+            <div class="safety-cover" id="safety-cover" role="button" tabindex="0"
+                 aria-label="安全カバー（開けないでください）">
+              <span class="cover-label">開けるな</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="panel-note">※ このボタンを押した場合に発生するいかなる事象についても、当施設は一切の責任を負いません。本当に負いません。</p>
+      </div>
+    </section>
+
+    <footer class="site-foot">
+      <p>国際ボタン管理機構（IBMO）認可 第0号 ／ <span class="foot-link" id="terms-link">利用規約</span></p>
+      <p class="foot-tip" id="terms-tip" hidden>第1条：押すな。　第2条：以上。</p>
+    </footer>
+  </main>
+
+  <!-- ===== オーバーレイ各種 ===== -->
+
+  <!-- 通報ダイアログ -->
+  <div class="overlay" id="report-overlay" hidden>
+    <div class="dialog" role="alertdialog" aria-label="通報完了">
+      <div class="dialog-title">■ 通報完了</div>
+      <div class="dialog-body">
+        <p>あなたの操作は国際ボタン管理機構（IBMO）に通報されました。</p>
+        <table class="dialog-table">
+          <tr><td>IPアドレス</td><td>127.0.0.1（あなたの家）</td></tr>
+          <tr><td>容疑</td><td>押すなと書いてあるものを押した罪</td></tr>
+          <tr><td>反省の色</td><td>確認できず</td></tr>
+        </table>
+      </div>
+      <button class="dialog-ok" id="report-ok">深く反省する</button>
+    </div>
+  </div>
+
+  <!-- 最終警告 -->
+  <div class="overlay final-warning" id="final-warning" hidden>
+    <div class="final-warning-inner">
+      <div class="fw-stripes" aria-hidden="true"></div>
+      <p class="fw-title">最　終　警　告</p>
+      <p class="fw-sub">FINAL WARNING — 次に押した場合、何が起きても知りません。</p>
+      <div class="fw-stripes" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <!-- カウントダウン -->
+  <div class="overlay countdown" id="countdown-overlay" hidden>
+    <p class="cd-label">自爆シーケンス起動</p>
+    <div class="cd-number" id="cd-number">10</div>
+    <p class="cd-msg" id="cd-msg">こうなることは警告しました。</p>
+    <button class="cd-abort" id="cd-abort">中止</button>
+  </div>
+
+  <!-- ホワイトアウト・フラッシュ -->
+  <div id="flash" hidden></div>
+
+  <!-- 偽ブルースクリーン -->
+  <div class="overlay bsod" id="bsod" hidden>
+    <div class="bsod-inner">
+      <div class="bsod-face">:(</div>
+      <p>ボタンが押されたため、この世界は問題に直面し、再構築が必要となりました。</p>
+      <p>エラー情報を収集しています（あなたが押したという情報です）。</p>
+      <p class="bsod-progress"><span id="bsod-pct">0</span>% 完了</p>
+      <p class="bsod-code">停止コード: OSHITA_NA_OMAE</p>
+    </div>
+  </div>
+
+  <!-- 再起動ターミナル -->
+  <div class="overlay reboot" id="reboot" hidden>
+    <pre class="reboot-log" id="reboot-log"></pre>
+  </div>
+
+  <!-- フィナーレ：認定証 -->
+  <div class="overlay finale" id="finale" hidden>
+    <canvas id="confetti"></canvas>
+    <div class="certificate">
+      <div class="cert-border">
+        <p class="cert-eyebrow">国際ボタン管理機構 公式認定</p>
+        <h2 class="cert-title">認 定 証</h2>
+        <p class="cert-body">
+          あなたは「絶対に押してはいけないボタン」を<br>
+          <strong class="cert-count"><span id="cert-count">0</span>回</strong>押し続け、<br>
+          世界を一度滅ぼし、そして再構築させました。
+        </p>
+        <p class="cert-meta">
+          所要時間：<span id="cert-time">--</span>　／　認定番号：<span id="cert-serial">No.???????</span>
+        </p>
+        <p class="cert-note">この功績を称え…&nbsp;ません。反省してください。</p>
+        <div class="cert-stamp" aria-hidden="true">押下<br>認定</div>
+      </div>
+      <button class="reset-button" id="reset-button">絶対に押してはいけないリセットボタン</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>RetroDesk 95</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='1' y='1' width='6' height='6' fill='%23e03c2d'/%3E%3Crect x='9' y='1' width='6' height='6' fill='%2361b233'/%3E%3Crect x='1' y='9' width='6' height='6' fill='%232e63c8'/%3E%3Crect x='9' y='9' width='6' height='6' fill='%23f2b410'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== デスクトップ ===== -->
+  <div id="desktop">
+    <div id="icons"></div>
+    <div id="windows"></div>
+  </div>
+
+  <!-- ===== タスクバー ===== -->
+  <div id="taskbar">
+    <button id="start-btn"><span class="start-logo"></span><span class="start-label">スタート</span></button>
+    <div class="tb-sep"></div>
+    <div id="task-buttons"></div>
+    <div id="tray">
+      <span id="tray-volume" title="音量"></span>
+      <span id="clock" title="">--:--</span>
+    </div>
+  </div>
+
+  <!-- ===== スタートメニュー ===== -->
+  <div id="start-menu" class="hidden">
+    <div class="sm-side"><span>RetroDesk<b>95</b></span></div>
+    <div class="sm-items">
+      <div class="sm-item has-sub">
+        <span class="sm-ic" data-icon="folder"></span><span class="sm-label">プログラム</span><span class="sm-arrow">▸</span>
+        <div class="sm-sub">
+          <div class="sm-item" data-app="paint"><span class="sm-ic" data-icon="paint"></span><span class="sm-label">ペイント</span></div>
+          <div class="sm-item" data-app="mine"><span class="sm-ic" data-icon="mine"></span><span class="sm-label">マインスイーパ</span></div>
+          <div class="sm-item" data-app="notepad"><span class="sm-ic" data-icon="notepad"></span><span class="sm-label">メモ帳</span></div>
+          <div class="sm-item" data-app="ie"><span class="sm-ic" data-icon="ie"></span><span class="sm-label">インターネット エクスプローラ</span></div>
+        </div>
+      </div>
+      <div class="sm-item" data-app="mycomputer"><span class="sm-ic" data-icon="computer"></span><span class="sm-label">マイ コンピュータ</span></div>
+      <div class="sm-item" data-app="bin"><span class="sm-ic" data-icon="bin"></span><span class="sm-label">ごみ箱</span></div>
+      <div class="sm-item" data-app="display"><span class="sm-ic" data-icon="display"></span><span class="sm-label">画面のプロパティ</span></div>
+      <div class="sm-sep"></div>
+      <div class="sm-item" data-app="about"><span class="sm-ic" data-icon="question"></span><span class="sm-label">RetroDesk のバージョン情報</span></div>
+      <div class="sm-item" data-app="run"><span class="sm-ic" data-icon="run"></span><span class="sm-label">ファイル名を指定して実行...</span></div>
+      <div class="sm-sep"></div>
+      <div class="sm-item" data-action="shutdown"><span class="sm-ic" data-icon="shutdown"></span><span class="sm-label">Windows の終了...</span></div>
+    </div>
+  </div>
+
+  <!-- ===== 起動 / 終了 画面 ===== -->
+  <div id="boot-press" class="boot-screen">
+    <div class="press-inner">
+      <pre>RETRODESK SYSTEM BIOS (C) 1995-2026
+
+
+        ████  RetroDesk 95  ████
+</pre>
+      <div class="press-msg">Press any key to start <span class="blink">▌</span></div>
+    </div>
+  </div>
+
+  <div id="boot-bios" class="boot-screen hidden"><pre id="bios-text"></pre></div>
+
+  <div id="boot-splash" class="boot-screen hidden">
+    <div class="splash-center">
+      <div class="splash-logo"></div>
+      <div class="splash-name">RetroDesk<span> 95</span></div>
+      <div class="splash-sub">起動しています...</div>
+    </div>
+    <div class="splash-bar"></div>
+  </div>
+
+  <div id="shutdown-screen" class="boot-screen hidden">
+    <div class="shut-text">コンピュータの電源を切る準備ができました。</div>
+    <div class="shut-sub">クリックすると再起動します</div>
+  </div>
+
+  <canvas id="screensaver" class="hidden"></canvas>
+  <div id="scanlines"></div>
+
+  <script src="system.js"></script>
+  <script src="programs.js"></script>
+  <script src="shell.js"></script>
+</body>
+</html>

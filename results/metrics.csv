@@ -1,0 +1,10 @@
+timestamp,task,model_key,model,run,branch,wall_seconds,duration_ms,num_turns,cost_usd,exit_code,subtype
+2026-06-11T08:54:11,c1,fable5,claude-fable-5,1,fable5/run1,427,417254,15,2.774222,0,success
+2026-06-11T09:02:12,c1,opus48,claude-opus-4-8,1,opus48/run1,197,187201,4,0.598065,0,success
+2026-06-11T09:09:34,c1,fable5,claude-fable-5,2,fable5/run2,408,398897,12,2.485292,0,success
+2026-06-11T09:16:57,c1,opus48,claude-opus-4-8,2,opus48/run2,115,104259,2,0.3568095,0,success
+2026-06-11T09:19:48,a,fable5,claude-fable-5,1,fable5/run1,337,331520,18,2.227034,0,success
+2026-06-11T09:26:34,a,opus48,claude-opus-4-8,1,opus48/run1,386,376283,22,1.623089,0,success
+2026-06-11T11:56:00,c2,fable5,claude-fable-5,1,fable5/run1,981,979183,9,5.642559,1,success
+2026-06-11T13:17:40,c2,opus48,claude-opus-4-8,1,opus48/run1,772,770454,22,3.1566225,0,success
+2026-06-11T13:45:48,c2,fable5,claude-fable-5,2,fable5/run2,1664,1662329,31,10.75391,0,success

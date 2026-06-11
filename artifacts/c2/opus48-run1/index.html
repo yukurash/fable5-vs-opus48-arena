@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroDesk 95</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='7' height='6' x='1' y='1' fill='%23ff3b30'/><rect width='7' height='6' x='8' y='1' fill='%234cd964'/><rect width='7' height='6' x='1' y='8' fill='%23007aff'/><rect width='7' height='6' x='8' y='8' fill='%23ffcc00'/></svg>">
+</head>
+<body>
+
+<!-- ============ BOOT SCREEN ============ -->
+<div id="boot">
+  <div class="boot-logo">
+    <div class="flag"><span class="q q1"></span><span class="q q2"></span><span class="q q3"></span><span class="q q4"></span></div>
+    <div class="boot-title">RetroDesk&nbsp;<small>95</small></div>
+    <div class="boot-bar"><i></i></div>
+  </div>
+  <div class="boot-tip">起動中… ダブルクリックでスキップ</div>
+</div>
+
+<!-- ============ DESKTOP ============ -->
+<div id="desktop">
+  <div id="rubber-band"></div>
+</div>
+
+<!-- ============ TASKBAR ============ -->
+<div id="taskbar">
+  <div id="start-button">
+    <img alt="" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='7' height='6' x='1' y='1' fill='%23ff3b30'/><rect width='7' height='6' x='8' y='1' fill='%234cd964'/><rect width='7' height='6' x='1' y='8' fill='%23007aff'/><rect width='7' height='6' x='8' y='8' fill='%23ffcc00'/></svg>">
+    <span>スタート</span>
+  </div>
+  <div class="taskbar-divider"></div>
+  <div id="task-buttons"></div>
+  <div id="systray">
+    <span id="clock">00:00</span>
+  </div>
+</div>
+
+<!-- ============ START MENU ============ -->
+<div id="start-menu">
+  <div class="start-sidebar">RetroDesk<b>95</b></div>
+  <div class="start-items"></div>
+</div>
+
+<!-- ============ FLOATING UI LAYERS ============ -->
+<div id="context-menu"></div>
+<div id="dialog-layer"><div class="dialog-backdrop"></div></div>
+
+<!-- ============ SCREENSAVER ============ -->
+<div id="screensaver"><canvas></canvas></div>
+
+<!-- ============ SHUTDOWN ============ -->
+<div id="shutdown">
+  <div class="sd-text">コンピューターの電源を<br>切る準備ができました。</div>
+  <div class="sd-sub">クリックすると再起動します</div>
+</div>
+
+<!-- ============ BSOD EASTER EGG ============ -->
+<div id="bsod">
+  <div class="bsod-body">
+    <div class="bsod-h">RetroDesk</div>
+    <p>致命的な例外 0E が 0028:C0011E36 で発生しました。現在のアプリケーションは終了します。</p>
+    <p>* 続行するには、任意のキーを押してください。<br>
+       * アプリケーションを終了するには、CTRL+ALT+DEL をもう一度押してください。<br>
+       &nbsp;&nbsp;保存していないデータはすべて失われます。</p>
+    <p style="text-align:center;margin-top:30px">続行するには <span class="blink">クリック</span> してください _</p>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

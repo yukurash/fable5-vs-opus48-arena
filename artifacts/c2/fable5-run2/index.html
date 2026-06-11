@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RetroDesk 95</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='1' y='1' width='6' height='6' fill='%23ff0000'/%3E%3Crect x='9' y='1' width='6' height='6' fill='%2300a800'/%3E%3Crect x='1' y='9' width='6' height='6' fill='%230000ff'/%3E%3Crect x='9' y='9' width='6' height='6' fill='%23ffc800'/%3E%3C/svg%3E">
+<!-- 7セグ風フォント(マインスイーパーのカウンター用 / オフライン時は monospace にフォールバック) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dseg@0.46.0/css/dseg.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ===== デスクトップ ===== -->
+  <div id="screen">
+    <div id="desktop">
+      <div id="icon-layer"></div>
+      <div id="window-layer"></div>
+    </div>
+
+    <div id="taskbar">
+      <button id="start-button" class="btn95" aria-haspopup="true">
+        <span class="start-logo"></span><span class="start-label">スタート</span>
+      </button>
+      <div class="task-divider"></div>
+      <div id="task-buttons"></div>
+      <div id="tray">
+        <button id="sound-toggle" title="サウンドのオン/オフ"></button>
+        <span id="clock" title="">--:--</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="start-menu" hidden></div>
+  <div id="ctx-menu" hidden></div>
+
+  <!-- ===== スクリーンセーバー ===== -->
+  <div id="screensaver" hidden><canvas id="ss-canvas"></canvas></div>
+
+  <!-- ===== ブルースクリーン(イースターエッグ) ===== -->
+  <div id="bsod" hidden>
+    <div class="bsod-inner">
+      <p class="bsod-title"> RetroDesk </p>
+      <p>
+例外 0E が VxD VMM(01) + 00010E36 の 0028:C0011E36 で発生しました。<br>
+現在のアプリケーションが正常に動作しなくなる可能性があります。<br><br>
+*  どれかキーを押すと、現在のアプリケーションを終了します。<br>
+*  もう一度 CTRL+ALT+DEL キーを押すと、コンピュータを再起動します。<br>
+&nbsp;&nbsp; その場合、アプリケーションで保存していない情報はすべて失われます。<br><br>
+      </p>
+      <p class="bsod-continue">どれかキーを押すと続行します <span class="blink">_</span></p>
+    </div>
+  </div>
+
+  <!-- ===== シャットダウン画面 ===== -->
+  <div id="shutdown-screen" hidden>
+    <div class="shutdown-msg">RetroDesk の電源を切る準備ができました。</div>
+    <div class="shutdown-sub blink">クリックすると再起動します</div>
+  </div>
+
+  <!-- ===== 起動シーケンス ===== -->
+  <div id="boot">
+    <div id="boot-power">
+      <div class="boot-logo-grid"></div>
+      <div class="boot-power-title">RetroDesk<span>95</span></div>
+      <div class="boot-power-hint blink">― 画面をクリックして電源を入れてください ―</div>
+    </div>
+    <pre id="boot-bios" hidden></pre>
+    <div id="boot-splash" hidden>
+      <div class="splash-clouds"></div>
+      <div class="splash-center">
+        <div class="splash-logo-grid"></div>
+        <div class="splash-name">RetroDesk<span class="splash-95">95</span></div>
+        <div class="splash-tag">じゅうばこの すみの デスクトップ体験</div>
+      </div>
+      <div class="splash-stripe"><div class="splash-stripe-runner"></div></div>
+    </div>
+  </div>
+
+  <div id="crt"></div>
+
+  <script src="js/icons.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/wm.js"></script>
+  <script src="js/apps.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
